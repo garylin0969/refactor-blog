@@ -12,6 +12,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/utils/shadcn';
 
+// 導航路由配置
 const NAVIGATION_ROUTES = [
     {
         label: 'Home',
@@ -25,8 +26,9 @@ const NAVIGATION_ROUTES = [
         label: 'About',
         href: '/about',
     },
-];
+] as const;
 
+// 社交媒體連結配置
 const SOCIAL_LINKS = [
     {
         href: 'https://www.linkedin.com/in/garylin0969',
@@ -42,49 +44,72 @@ const SOCIAL_LINKS = [
     },
 ] as const;
 
+// 通用樣式類別
+const HEADER_STYLES = {
+    container: 'border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md',
+    innerContainer: 'container mx-auto flex h-full items-center justify-between px-4',
+    desktopNav: 'hidden items-center gap-2 md:flex',
+    mobileNav: 'flex items-center gap-2 md:hidden',
+    socialLinks: 'flex items-center gap-2',
+    navLink: cn(navigationMenuTriggerStyle(), 'font-bold'),
+    iconSize: 'size-4',
+} as const;
+
 const Header = () => {
     return (
-        <header className="border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md">
-            <div className="container mx-auto flex h-full items-center justify-between px-4">
+        <header className={HEADER_STYLES.container}>
+            <div className={HEADER_STYLES.innerContainer}>
+                {/* 網站標題 */}
                 <h1 className="font-bold">GaryLin.dev</h1>
-                <div className="hidden items-center gap-2 md:flex">
+
+                {/* 桌面版導航 */}
+                <div className={HEADER_STYLES.desktopNav}>
                     <NavigationMenu>
                         <NavigationMenuList>
                             {NAVIGATION_ROUTES.map((route) => (
                                 <NavigationMenuItem key={route.href}>
-                                    <NavigationMenuLink
-                                        asChild
-                                        className={cn(navigationMenuTriggerStyle(), 'font-bold')}
-                                    >
+                                    <NavigationMenuLink asChild className={HEADER_STYLES.navLink}>
                                         <Link href={route.href}>{route.label}</Link>
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
                             ))}
                         </NavigationMenuList>
                     </NavigationMenu>
-                    <div className="flex items-center gap-2">
-                        {SOCIAL_LINKS.map((link) => (
-                            <a key={link.label} href={link.href} target={link.target} rel="noopener noreferrer">
-                                <link.icon className="size-4" />
-                            </a>
-                        ))}
+
+                    {/* 社交媒體連結 */}
+                    <div className={HEADER_STYLES.socialLinks}>
+                        {SOCIAL_LINKS.map((link) => {
+                            const IconComponent = link.icon;
+                            return (
+                                <a
+                                    key={link.label}
+                                    href={link.href}
+                                    target={link.target}
+                                    rel="noopener noreferrer"
+                                    aria-label={link.label}
+                                >
+                                    <IconComponent className={HEADER_STYLES.iconSize} />
+                                </a>
+                            );
+                        })}
                     </div>
+
                     <ThemeToggle />
                 </div>
-                <div className="flex items-center gap-2 md:hidden">
+
+                {/* 手機版導航 */}
+                <div className={HEADER_STYLES.mobileNav}>
                     <ThemeToggle />
                     <Sheet>
-                        <SheetTrigger>
-                            <MenuIcon className="size-4" />
+                        <SheetTrigger aria-label="open menu">
+                            <MenuIcon className={HEADER_STYLES.iconSize} />
                         </SheetTrigger>
                         <SheetContent side="left">
                             <SheetHeader>
-                                <SheetTitle>Are you absolutely sure?</SheetTitle>
-                                <SheetDescription>
-                                    This action cannot be undone. This will permanently delete your account and remove
-                                    your data from our servers.
-                                </SheetDescription>
+                                <SheetTitle>導航選單</SheetTitle>
+                                <SheetDescription>選擇您想要瀏覽的頁面</SheetDescription>
                             </SheetHeader>
+                            {/* 這裡可以放置手機版的導航內容 */}
                         </SheetContent>
                     </Sheet>
                 </div>
