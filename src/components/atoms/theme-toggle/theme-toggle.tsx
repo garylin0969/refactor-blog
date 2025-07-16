@@ -30,7 +30,7 @@ const ThemeToggle = () => {
             className="h-9 w-9 p-0"
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
         >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4" />}
             <span className="sr-only">切換主題</span>
         </Button>
     );
