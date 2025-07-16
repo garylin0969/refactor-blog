@@ -47,27 +47,30 @@ const Header = () => {
         <header className="border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md">
             <div className="container mx-auto flex h-full items-center justify-between px-4">
                 <h1 className="font-bold">GaryLin.dev</h1>
-                <NavigationMenu className="hidden md:block">
-                    <NavigationMenuList>
-                        {NAVIGATION_ROUTES.map((route) => (
-                            <NavigationMenuItem key={route.href}>
-                                <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'font-bold')}>
-                                    <Link href={route.href}>{route.label}</Link>
-                                </NavigationMenuLink>
-                            </NavigationMenuItem>
-                        ))}
-                        <NavigationMenuItem className="flex items-center gap-2">
-                            {SOCIAL_LINKS.map((link) => (
-                                <a key={link.label} href={link.href} target={link.target} rel="noopener noreferrer">
-                                    <link.icon className="size-4" />
-                                </a>
+                <div className="hidden items-center gap-2 md:flex">
+                    <NavigationMenu>
+                        <NavigationMenuList>
+                            {NAVIGATION_ROUTES.map((route) => (
+                                <NavigationMenuItem key={route.href}>
+                                    <NavigationMenuLink
+                                        asChild
+                                        className={cn(navigationMenuTriggerStyle(), 'font-bold')}
+                                    >
+                                        <Link href={route.href}>{route.label}</Link>
+                                    </NavigationMenuLink>
+                                </NavigationMenuItem>
                             ))}
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <ThemeToggle />
-                        </NavigationMenuItem>
-                    </NavigationMenuList>
-                </NavigationMenu>
+                        </NavigationMenuList>
+                    </NavigationMenu>
+                    <div className="flex items-center gap-2">
+                        {SOCIAL_LINKS.map((link) => (
+                            <a key={link.label} href={link.href} target={link.target} rel="noopener noreferrer">
+                                <link.icon className="size-4" />
+                            </a>
+                        ))}
+                    </div>
+                    <ThemeToggle />
+                </div>
                 <div className="flex items-center gap-2 md:hidden">
                     <ThemeToggle />
                     <Sheet>
