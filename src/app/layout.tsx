@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { ReactNode } from 'react';
 import Header from '@/components/organisms/header';
+import { ThemeProvider } from '@/providers';
 import { cn } from '@/utils/shadcn';
 import './globals.css';
 
@@ -22,15 +24,17 @@ export const metadata: Metadata = {
 export default function RootLayout({
     children,
 }: Readonly<{
-    children: React.ReactNode;
+    children: ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="zh-TW" suppressHydrationWarning>
             <body className={cn(geistSans.variable, geistMono.variable, 'antialiased')}>
-                <div className="flex min-h-screen flex-col">
-                    <Header />
-                    <main className="flex-1">{children}</main>
-                </div>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    <div className="flex min-h-screen flex-col">
+                        <Header />
+                        <main className="flex-1">{children}</main>
+                    </div>
+                </ThemeProvider>
             </body>
         </html>
     );
