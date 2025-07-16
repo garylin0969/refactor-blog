@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ThemeToggle from '@/components/atoms/theme-toggle';
 import {
     NavigationMenu,
     NavigationMenuList,
@@ -6,6 +7,7 @@ import {
     NavigationMenuLink,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { cn } from '@/utils/shadcn';
 
 const Header = () => {
     return (
@@ -15,19 +17,22 @@ const Header = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                            <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'font-bold')}>
                                 <Link href="/">Home</Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                            <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'font-bold')}>
                                 <Link href="/blog">Blog</Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                            <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'font-bold')}>
                                 <Link href="/about">About</Link>
                             </NavigationMenuLink>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <ThemeToggle />
                         </NavigationMenuItem>
                     </NavigationMenuList>
                 </NavigationMenu>
