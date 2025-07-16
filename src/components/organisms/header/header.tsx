@@ -1,6 +1,7 @@
 import { MenuIcon } from 'lucide-react';
 import Link from 'next/link';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import NextImage from '@/components/atoms/next-image';
 import ThemeToggle from '@/components/atoms/theme-toggle';
 import {
     NavigationMenu,
@@ -11,6 +12,9 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/utils/shadcn';
+
+const LOGO_IMAGE_PATH = '/favicons/favicon-32x32.png';
+const WEBSITE_TITLE = 'garylin.dev';
 
 // 導航路由配置
 const NAVIGATION_ROUTES = [
@@ -48,9 +52,9 @@ const SOCIAL_LINKS = [
 const HEADER_STYLES = {
     container: 'border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md',
     innerContainer: 'container mx-auto flex h-full items-center justify-between px-4',
-    desktopNav: 'hidden items-center gap-2 md:flex',
-    mobileNav: 'flex items-center gap-2 md:hidden',
-    socialLinks: 'flex items-center gap-2',
+    desktopNav: 'hidden items-center gap-x-2 md:flex',
+    mobileNav: 'flex items-center gap-x-2 md:hidden',
+    socialLinks: 'flex items-center gap-x-2',
     navLink: cn(navigationMenuTriggerStyle(), 'font-bold'),
     iconSize: 'size-4',
 } as const;
@@ -60,7 +64,10 @@ const Header = () => {
         <header className={HEADER_STYLES.container}>
             <div className={HEADER_STYLES.innerContainer}>
                 {/* 網站標題 */}
-                <h1 className="font-bold">GaryLin.dev</h1>
+                <Link href="/" className="flex items-center gap-x-2">
+                    <NextImage src={LOGO_IMAGE_PATH} width={32} height={32} loading="eager" alt="website logo" />
+                    <h1 className="font-bold">{WEBSITE_TITLE}</h1>
+                </Link>
 
                 {/* 桌面版導航 */}
                 <div className={HEADER_STYLES.desktopNav}>
