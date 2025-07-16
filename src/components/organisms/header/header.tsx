@@ -1,5 +1,6 @@
 import { MenuIcon } from 'lucide-react';
 import Link from 'next/link';
+import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import ThemeToggle from '@/components/atoms/theme-toggle';
 import {
     NavigationMenu,
@@ -26,6 +27,21 @@ const NAVIGATION_ROUTES = [
     },
 ];
 
+const SOCIAL_LINKS = [
+    {
+        href: 'https://www.linkedin.com/in/garylin0969',
+        target: '_blank',
+        icon: FaLinkedin,
+        label: 'LinkedIn',
+    },
+    {
+        href: 'https://github.com/garylin0969',
+        target: '_blank',
+        icon: FaGithub,
+        label: 'GitHub',
+    },
+] as const;
+
 const Header = () => {
     return (
         <header className="border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md">
@@ -40,6 +56,13 @@ const Header = () => {
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
                         ))}
+                        <NavigationMenuItem className="flex items-center gap-2">
+                            {SOCIAL_LINKS.map((link) => (
+                                <a key={link.label} href={link.href} target={link.target} rel="noopener noreferrer">
+                                    <link.icon className="size-4" />
+                                </a>
+                            ))}
+                        </NavigationMenuItem>
                         <NavigationMenuItem>
                             <ThemeToggle />
                         </NavigationMenuItem>
