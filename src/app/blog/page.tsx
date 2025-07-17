@@ -1,6 +1,5 @@
+import { posts, type Post } from '@velite';
 import Link from 'next/link';
-import { posts } from '../../../.velite';
-import type { Post } from '../../../.velite';
 
 const BlogPage = () => {
     return (
