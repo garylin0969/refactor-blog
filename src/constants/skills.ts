@@ -1,4 +1,4 @@
-export const SKILLS_LIST = [
+export const SKILL_LIST = [
     {
         id: 'html-css',
         title: 'HTML/CSS',
