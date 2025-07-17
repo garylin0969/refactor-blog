@@ -7,9 +7,9 @@ interface BlogLayoutProps {
 
 const BlogLayout = ({ children }: BlogLayoutProps) => {
     return (
-        <div className="flex">
+        <div className="flex flex-col md:flex-row">
             <div className="flex-1">{children}</div>
-            <aside className="w-74">
+            <aside className="hidden w-74 md:block">
                 <AuthorCard />
             </aside>
         </div>
