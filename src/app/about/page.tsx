@@ -1,112 +1,15 @@
-import NextImage from '@/components/atoms/next-image';
 import SectionTitle from '@/components/atoms/section-title';
 import AuthorCard from '@/components/molecules/author-card';
 import IntroCard from '@/components/molecules/intro-card';
+import ProjectCard from '@/components/molecules/project-card';
 import SkillCard from '@/components/molecules/skill-card';
 import ExperienceTimeline from '@/components/organisms/experience-timeline';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { PROJECT_LIST } from '@/constants/project';
 import { SKILL_LIST } from '@/constants/skills';
-
-const PROJECT_LIST = [
-    {
-        id: 'hot-now',
-        image: '/projects/hot-now.jpg',
-        url: 'https://hotnow.garylin.dev/',
-        name: 'Hot Now',
-        tags: [
-            '2025',
-            'Next.js',
-            'TypeScript',
-            'Tailwind CSS',
-            'Shadcn UI',
-            'Zustand',
-            'TanStack Query',
-            'React Hook Form',
-            'Zod',
-            'Google Analytics',
-            'Puppeteer',
-            'next-themes',
-        ],
-    },
-    {
-        id: 'life-restart',
-        image: '/projects/life-restart.jpg',
-        url: 'https://garylin0969-life-restart.vercel.app/',
-        name: '人生重來 - Life Restart',
-        tags: ['2025', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Shadcn UI', 'next-intl', 'next-themes'],
-    },
-    {
-        id: 'perplexity-ai-concat',
-        image: '/projects/perplexity-ai-concat.jpg',
-        url: 'https://garylin0969-perplexity-concat.vercel.app/',
-        name: 'AI 串接測試工具 - Perplexity AI Concat',
-        tags: ['2025', 'Perplexity API', 'React', 'TypeScript', 'Tailwind CSS', 'React Hook Form', 'React Json View'],
-    },
-    {
-        id: 'gemini-api-tester',
-        image: '/projects/gemini-api-tester.jpg',
-        url: 'https://garylin0969-gemini-tester.vercel.app/',
-        name: 'AI 串接測試工具 - Gemini API Tester',
-        tags: ['2025', 'Gemini', 'Next', 'TypeScript', 'Tailwind CSS', 'Shadcn UI', 'React Query'],
-    },
-    {
-        id: 'blog',
-        image: '/projects/blog.jpg',
-        url: 'https://github.com/garylin0969/blog',
-        name: 'Blog - GaryLin.dev',
-        tags: [
-            '2024',
-            'Next.js',
-            'TypeScript',
-            'Google Analytics',
-            'Contentlayer',
-            'Tailwind CSS',
-            'next-themes',
-            'Giscus',
-        ],
-    },
-    {
-        id: 'chinese-number-format',
-        image: '/projects/chinese-number-format.avif',
-        url: 'https://www.npmjs.com/package/chinese-number-format',
-        name: 'NPM 套件 - chinese-number-format',
-        tags: ['2024', 'TypeScript', 'Jest', 'NPM'],
-    },
-    {
-        id: 'next13-imdb-clone',
-        image: '/projects/next13-imdb-clone.avif',
-        url: 'https://garylin0969-next-imdb-clone.vercel.app',
-        name: 'Clone - IMDb',
-        tags: ['2023', 'Next.js', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS', 'next-themes'],
-    },
-    {
-        id: 'next13-google-clone',
-        image: '/projects/next13-google-clone.avif',
-        url: 'https://garylin0969-next-google-clone.vercel.app',
-        name: 'Clone - Google',
-        tags: ['2023', 'Next.js', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS'],
-    },
-    {
-        id: 'akatsuki',
-        image: '/projects/akatsuki.avif',
-        url: 'https://garylin0969-akatsuki.vercel.app',
-        name: '火影忍者 - 曉組織成員介紹',
-        tags: ['2023', 'React.js', 'Redux', 'TypeScript', 'Styled Components'],
-    },
-    {
-        id: 'ispan-project',
-        image: '/projects/ispan-project.jpg',
-        url: 'https://github.com/garylin0969/react-ispan-project',
-        name: 'iSpan 資策會 - 專題',
-        tags: ['2022', 'React.js', 'JavaScript', 'Socket.IO', 'Bootstrap', 'GSAP'],
-    },
-];
 
 const AboutPage = () => {
     return (
-        <div className="mx-auto my-8 max-w-6xl space-y-8">
+        <div className="mx-auto max-w-6xl space-y-8">
             <section className="space-y-8">
                 {/* 作者卡片 */}
                 <AuthorCard className="mx-auto" />
@@ -129,30 +32,10 @@ const AboutPage = () => {
             </section>
             <section className="space-y-8">
                 <SectionTitle className="text-center">Projects</SectionTitle>
+                {/* 專案卡片 */}
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     {PROJECT_LIST.map((project) => (
-                        <a key={project.id} href={project.url} className="group h-full">
-                            <Card className="flex h-full flex-col gap-0 overflow-hidden p-0">
-                                <AspectRatio ratio={16 / 9} className="overflow-hidden">
-                                    <NextImage
-                                        className="object-cover duration-300 group-hover:scale-110"
-                                        src={project.image}
-                                        alt={project.name}
-                                        fill
-                                    />
-                                </AspectRatio>
-                                <CardContent className="flex flex-1 flex-col space-y-6 p-6">
-                                    <CardTitle>{project.name}</CardTitle>
-                                    <div className="flex flex-wrap gap-2">
-                                        {project.tags.map((tag) => (
-                                            <Badge key={tag} className="px-2 py-1" variant="secondary">
-                                                {tag}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </a>
+                        <ProjectCard key={project.id} project={project} className="h-full" />
                     ))}
                 </div>
             </section>
