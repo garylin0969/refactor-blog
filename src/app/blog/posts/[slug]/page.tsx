@@ -1,8 +1,7 @@
+import { posts } from '@velite';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { posts } from '../../../../../.velite';
-import type { Post } from '../../../../../.velite';
-import { MDXContent } from '../../../../components/mdx-content';
+import MDXContent from '@/components/molecules/mdx-content';
 
 interface PageProps {
     params: {
