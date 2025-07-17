@@ -1,6 +1,6 @@
 export const AUTHOR_INFO = {
     name: 'Gary Lin',
-    avatar: 'https://github.com/shadcn.png',
+    avatar: '/avatar/author.jpg',
     location: 'Taipei, Taiwan',
     email: 'garylin0969@gmail.com',
 };
