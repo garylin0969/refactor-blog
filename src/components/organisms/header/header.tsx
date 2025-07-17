@@ -6,7 +6,7 @@ import SocialLinks from '@/components/molecules/social-links';
 
 // 通用樣式類別
 const HEADER_STYLES = {
-    container: 'border-border/40 bg-background/70 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md',
+    container: 'border-border/40 bg-background/60 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md',
     innerContainer: 'container mx-auto flex h-full items-center justify-between px-4',
     desktopNav: 'hidden items-center gap-x-2 md:flex',
 } as const;
