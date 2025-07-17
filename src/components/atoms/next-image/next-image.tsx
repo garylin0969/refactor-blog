@@ -1,6 +1,5 @@
 import Image, { ImageProps } from 'next/image';
-
-const DEFAULT_IMAGE_NOT_FOUND = '/image-not-found.png';
+import { DEFAULT_IMAGE_NOT_FOUND } from '@/constants/site';
 
 const NextImage = ({ src, unoptimized = true, ...props }: ImageProps) => {
     const imgSrc = src || DEFAULT_IMAGE_NOT_FOUND;

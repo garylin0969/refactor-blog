@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import NextImage from '@/components/atoms/next-image';
-
-const LOGO_IMAGE_PATH = '/favicons/favicon-32x32.png';
-const WEBSITE_TITLE = 'garylin.dev';
+import { LOGO_IMAGE_PATH, WEBSITE_TITLE } from '@/constants/site';
 
 interface LogoProps {
     href?: string;

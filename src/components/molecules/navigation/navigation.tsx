@@ -6,23 +6,8 @@ import {
     NavigationMenuLink,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { NAVIGATION_ROUTES } from '@/constants/navigation';
 import { cn } from '@/utils/shadcn';
-
-// 導航路由配置
-const NAVIGATION_ROUTES = [
-    {
-        label: 'Home',
-        href: '/',
-    },
-    {
-        label: 'Blog',
-        href: '/blog',
-    },
-    {
-        label: 'About',
-        href: '/about',
-    },
-] as const;
 
 interface NavigationProps {
     menuClassName?: string;

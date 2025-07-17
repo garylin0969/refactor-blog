@@ -2,14 +2,8 @@ import { MapPinIcon, MailIcon } from 'lucide-react';
 import BaseAvatar from '@/components/atoms/base-avatar';
 import SocialLinks from '@/components/molecules/social-links';
 import { Card, CardContent } from '@/components/ui/card';
+import { AUTHOR_INFO } from '@/constants/author-info';
 import { cn } from '@/utils/shadcn';
-
-const AUTHOR_INFO = {
-    name: 'Gary Lin',
-    avatar: 'https://github.com/shadcn.png',
-    location: 'Taipei, Taiwan',
-    email: 'garylin0969@gmail.com',
-} as const;
 
 interface AuthorCardProps {
     className?: string;
