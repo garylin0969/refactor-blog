@@ -17,7 +17,7 @@ const PROJECT_LIST = [
         name: 'Hot Now',
         tags: [
             '2025',
-            'Next',
+            'Next.js',
             'TypeScript',
             'Tailwind CSS',
             'Shadcn UI',
@@ -35,7 +35,7 @@ const PROJECT_LIST = [
         image: '/projects/life-restart.jpg',
         url: 'https://garylin0969-life-restart.vercel.app/',
         name: '人生重來 - Life Restart',
-        tags: ['2025', 'Next', 'TypeScript', 'Tailwind CSS', 'Shadcn UI', 'next-intl', 'next-themes'],
+        tags: ['2025', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Shadcn UI', 'next-intl', 'next-themes'],
     },
     {
         id: 'perplexity-ai-concat',
@@ -58,7 +58,7 @@ const PROJECT_LIST = [
         name: 'Blog - GaryLin.dev',
         tags: [
             '2024',
-            'Next',
+            'Next.js',
             'TypeScript',
             'Google Analytics',
             'Contentlayer',
@@ -79,28 +79,28 @@ const PROJECT_LIST = [
         image: '/projects/next13-imdb-clone.avif',
         url: 'https://garylin0969-next-imdb-clone.vercel.app',
         name: 'Clone - IMDb',
-        tags: ['2023', 'Next', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS', 'next-themes'],
+        tags: ['2023', 'Next.js', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS', 'next-themes'],
     },
     {
         id: 'next13-google-clone',
         image: '/projects/next13-google-clone.avif',
         url: 'https://garylin0969-next-google-clone.vercel.app',
         name: 'Clone - Google',
-        tags: ['2023', 'Next', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS'],
+        tags: ['2023', 'Next.js', 'TypeScript', 'React Hook Form', 'SWR', 'Tailwind CSS'],
     },
     {
         id: 'akatsuki',
         image: '/projects/akatsuki.avif',
         url: 'https://garylin0969-akatsuki.vercel.app',
         name: '火影忍者 - 曉組織成員介紹',
-        tags: ['2023', 'React', 'Redux', 'TypeScript', 'Styled Components'],
+        tags: ['2023', 'React.js', 'Redux', 'TypeScript', 'Styled Components'],
     },
     {
         id: 'ispan-project',
         image: '/projects/ispan-project.jpg',
         url: 'https://github.com/garylin0969/react-ispan-project',
         name: 'iSpan 資策會 - 專題',
-        tags: ['2022', 'React', 'JavaScript', 'Socket.IO', 'Bootstrap', 'GSAP'],
+        tags: ['2022', 'React.js', 'JavaScript', 'Socket.IO', 'Bootstrap', 'GSAP'],
     },
 ];
 
@@ -131,16 +131,18 @@ const AboutPage = () => {
                 <SectionTitle className="text-center">Projects</SectionTitle>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     {PROJECT_LIST.map((project) => (
-                        <a key={project.id} href={project.url}>
-                            <Card className="gap-0 overflow-hidden p-0">
+                        <a key={project.id} href={project.url} className="h-full">
+                            <Card className="flex h-full flex-col gap-0 overflow-hidden p-0">
                                 <AspectRatio ratio={16 / 9}>
                                     <NextImage className="object-cover" src={project.image} alt={project.name} fill />
                                 </AspectRatio>
-                                <CardContent className="space-y-4 p-6">
+                                <CardContent className="flex flex-1 flex-col space-y-6 p-6">
                                     <CardTitle>{project.name}</CardTitle>
                                     <div className="flex flex-wrap gap-2">
                                         {project.tags.map((tag) => (
-                                            <Badge key={tag}>{tag}</Badge>
+                                            <Badge key={tag} className="px-2 py-1" variant="secondary">
+                                                {tag}
+                                            </Badge>
                                         ))}
                                     </div>
                                 </CardContent>
