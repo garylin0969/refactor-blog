@@ -1,4 +1,4 @@
-import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import { FaFacebook, FaGithub, FaLinkedin } from 'react-icons/fa';
 import SocialLink from '@/components/atoms/social-link';
 
 // 社交媒體連結配置
@@ -8,6 +8,12 @@ const SOCIAL_LINKS = [
         target: '_blank',
         icon: FaLinkedin,
         label: 'LinkedIn',
+    },
+    {
+        href: 'https://www.facebook.com/profile.php?id=100009915255579&mibextid=ZbWKwL',
+        target: '_blank',
+        icon: FaFacebook,
+        label: 'Facebook',
     },
     {
         href: 'https://github.com/garylin0969',
