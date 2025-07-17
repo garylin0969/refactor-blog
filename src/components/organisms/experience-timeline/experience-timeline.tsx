@@ -9,7 +9,7 @@ const ExperienceTimeline = () => {
             <div className="bg-primary absolute left-1/2 hidden h-full w-0.5 -translate-x-1/2 transform md:block"></div>
 
             {/* 時間軸項目 */}
-            <div className="space-y-6 md:space-y-12">
+            <div className="space-y-6">
                 {EXPERIENCE_LIST.map((experience, index) => {
                     const isEven = index % 2 === 0;
                     return (
