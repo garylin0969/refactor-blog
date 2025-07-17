@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import { ReactNode } from 'react';
+import Footer from '@/components/organisms/footer';
 import Header from '@/components/organisms/header';
 import { ThemeProvider } from '@/providers';
 import { cn } from '@/utils/shadcn';
@@ -40,6 +41,7 @@ export default function RootLayout({
                     <div className="flex min-h-screen flex-col">
                         <Header />
                         <main className="container mx-auto flex-1 px-4">{children}</main>
+                        <Footer />
                     </div>
                 </ThemeProvider>
             </body>
