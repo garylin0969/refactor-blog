@@ -15,7 +15,7 @@ const AuthorCard = ({ className }: AuthorCardProps) => {
             <CardContent className="space-y-3">
                 <BaseAvatar className="mx-auto size-33" src={AUTHOR_INFO.avatar} fallback="author" />
                 <div className="text-center text-2xl font-bold">{AUTHOR_INFO.name}</div>
-                <ul className="flex flex-col items-center gap-y-2">
+                <ul className="flex flex-col items-center gap-y-2 text-sm">
                     <li className="flex items-center gap-x-2">
                         <MapPinIcon className="size-4" />
                         <span>{AUTHOR_INFO.location}</span>
