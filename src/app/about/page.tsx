@@ -131,10 +131,15 @@ const AboutPage = () => {
                 <SectionTitle className="text-center">Projects</SectionTitle>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     {PROJECT_LIST.map((project) => (
-                        <a key={project.id} href={project.url} className="h-full">
+                        <a key={project.id} href={project.url} className="group h-full">
                             <Card className="flex h-full flex-col gap-0 overflow-hidden p-0">
-                                <AspectRatio ratio={16 / 9}>
-                                    <NextImage className="object-cover" src={project.image} alt={project.name} fill />
+                                <AspectRatio ratio={16 / 9} className="overflow-hidden">
+                                    <NextImage
+                                        className="object-cover duration-300 group-hover:scale-110"
+                                        src={project.image}
+                                        alt={project.name}
+                                        fill
+                                    />
                                 </AspectRatio>
                                 <CardContent className="flex flex-1 flex-col space-y-6 p-6">
                                     <CardTitle>{project.name}</CardTitle>
