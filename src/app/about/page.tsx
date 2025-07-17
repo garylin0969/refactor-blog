@@ -2,9 +2,9 @@ import AuthorCard from '@/components/molecules/author-card';
 
 const AboutPage = () => {
     return (
-        <>
-            <AuthorCard />
-        </>
+        <div className="my-8">
+            <AuthorCard className="mx-auto" />
+        </div>
     );
 };
 
