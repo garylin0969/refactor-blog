@@ -10,8 +10,8 @@ interface SectionTitleProps {
 
 const SectionTitle = ({ className, as: Component = 'h2', isHash = true, children }: SectionTitleProps) => {
     return (
-        <Component className={cn('text-3xl font-bold tracking-tight lg:text-4xl', className)}>
-            {isHash && <span className="text-primary mr-1">#</span>}
+        <Component className={cn('text-primary text-3xl font-bold tracking-tight lg:text-4xl', className)}>
+            {isHash && <span className="mr-1">#</span>}
             {children}
         </Component>
     );
