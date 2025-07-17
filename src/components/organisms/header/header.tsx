@@ -66,7 +66,7 @@ const Header = () => {
                 {/* 網站標題 */}
                 <Link href="/" className="flex items-center gap-x-2">
                     <NextImage src={LOGO_IMAGE_PATH} width={32} height={32} loading="eager" alt="website logo" />
-                    <h1 className="font-bold">{WEBSITE_TITLE}</h1>
+                    <span className="font-bold">{WEBSITE_TITLE}</span>
                 </Link>
 
                 {/* 桌面版導航 */}
@@ -113,10 +113,44 @@ const Header = () => {
                         </SheetTrigger>
                         <SheetContent side="left">
                             <SheetHeader>
-                                <SheetTitle>導航選單</SheetTitle>
-                                <SheetDescription>選擇您想要瀏覽的頁面</SheetDescription>
+                                <SheetTitle>
+                                    <NextImage
+                                        src={LOGO_IMAGE_PATH}
+                                        width={32}
+                                        height={32}
+                                        loading="eager"
+                                        alt="website logo"
+                                    />
+                                    <span className="sr-only">{WEBSITE_TITLE}</span>
+                                </SheetTitle>
                             </SheetHeader>
-                            {/* 這裡可以放置手機版的導航內容 */}
+                            <NavigationMenu className="flex min-w-full flex-none flex-col items-start justify-start gap-y-2">
+                                <NavigationMenuList className="flex flex-col items-start gap-y-2">
+                                    {NAVIGATION_ROUTES.map((route) => (
+                                        <NavigationMenuItem key={route.href}>
+                                            <NavigationMenuLink asChild className={HEADER_STYLES.navLink}>
+                                                <Link href={route.href}>{route.label}</Link>
+                                            </NavigationMenuLink>
+                                        </NavigationMenuItem>
+                                    ))}
+                                </NavigationMenuList>
+                            </NavigationMenu>
+                            <div className="flex items-center gap-x-2 px-4">
+                                {SOCIAL_LINKS.map((link) => {
+                                    const IconComponent = link.icon;
+                                    return (
+                                        <a
+                                            key={link.label}
+                                            href={link.href}
+                                            target={link.target}
+                                            rel="noopener noreferrer"
+                                            aria-label={link.label}
+                                        >
+                                            <IconComponent className="size-5" />
+                                        </a>
+                                    );
+                                })}
+                            </div>
                         </SheetContent>
                     </Sheet>
                 </div>
