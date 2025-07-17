@@ -11,7 +11,13 @@ interface ExperienceCardProps {
 const ExperienceCard = ({ experience }: ExperienceCardProps) => (
     <Card className="gap-y-2 p-2.5">
         <CardHeader className="flex items-center gap-x-2 p-0">
-            <NextImage className="rounded-md" src={experience.image} alt={experience.company} width={64} height={64} />
+            <NextImage
+                className="rounded-md bg-white"
+                src={experience.image}
+                alt={experience.company}
+                width={64}
+                height={64}
+            />
             <div className="space-y-1">
                 <CardTitle>{experience.title}</CardTitle>
                 <CardDescription>{experience.company}</CardDescription>
