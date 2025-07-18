@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useMemo, useEffect, useState, ReactNode } from 'react';
 import NextImage from '@/components/atoms/next-image';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
 import { cn } from '@/utils/shadcn';
 
@@ -124,7 +125,12 @@ const GithubStatsCard = ({
 
     // 在元件掛載前，避免 hydration 不匹配
     if (!mounted) {
-        return null;
+        if (useCard) {
+            // 卡片類型需要額外加上卡片的 padding 高度
+            return <Skeleton style={{ width: width, height: height + 48 }} />;
+        }
+
+        return <Skeleton style={{ width: width, height: height }} />;
     }
 
     if (useCard) {
