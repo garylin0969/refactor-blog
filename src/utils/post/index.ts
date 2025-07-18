@@ -1,5 +1,10 @@
 import { posts, type Post } from '@velite';
 
+interface Options {
+    sort?: 'asc' | 'desc';
+    draft?: boolean;
+}
+
 // 排序文章 asc 升序，desc 降序
 export const sortPosts = (posts: Post[], sort: 'asc' | 'desc' = 'desc') => {
     return posts.sort((a, b) => {
@@ -31,11 +36,24 @@ export const getPostBySlug = (slug: string) => {
 };
 
 // 根據分類獲取文章
-export const getPostByCategory = (category: string) => {
-    return sortPosts(posts).filter((post) => post?.category === category);
+export const getPostByCategory = (category: string, options: Options = { sort: 'desc', draft: false }) => {
+    const filteredPosts = posts.filter((post) => post?.category === category && post?.draft === options.draft);
+    return sortPosts(filteredPosts, options.sort);
 };
 
 // 根據標籤獲取文章
 export const getPostByTag = (tag: string) => {
     return sortPosts(posts).filter((post) => post?.tags?.includes(tag));
+};
+
+// 獲取所有分類
+export const getAllCategories = (options: Options = { sort: 'desc', draft: false }) => {
+    const filteredPosts = posts.filter((post) => post?.draft === options.draft);
+    return [...new Set(filteredPosts.map((post) => post?.category))];
+};
+
+// 獲取所有標籤
+export const getAllTags = (options: Options = { sort: 'desc', draft: false }) => {
+    const filteredPosts = posts.filter((post) => post?.draft === options.draft);
+    return [...new Set(filteredPosts.flatMap((post) => post?.tags))];
 };
