@@ -6,7 +6,7 @@ export const NAVIGATION_ROUTES = [
     },
     {
         label: 'Blog',
-        href: '/blog',
+        href: '/blog/all/1',
     },
     {
         label: 'About',
