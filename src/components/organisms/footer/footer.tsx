@@ -9,7 +9,12 @@ const Footer = () => {
                 &copy;{' '}
                 {FOOTER_CONFIG.startYear === currentYear ? currentYear : `${FOOTER_CONFIG.startYear}-${currentYear}`}
                 <span className="mx-1">
-                    <a href={FOOTER_CONFIG.link} target="_blank" rel="noopener noreferrer">
+                    <a
+                        className="hover:text-primary"
+                        href={FOOTER_CONFIG.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         {FOOTER_CONFIG.linkTitle}
                     </a>
                 </span>

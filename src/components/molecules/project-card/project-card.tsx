@@ -23,7 +23,7 @@ const ProjectCard = ({ className, project }: ProjectCardProps) => {
                     />
                 </AspectRatio>
                 <CardContent className="flex flex-1 flex-col space-y-6 p-6">
-                    <CardTitle>{project.name}</CardTitle>
+                    <CardTitle className="group-hover:text-primary">{project.name}</CardTitle>
                     <div className="flex flex-wrap gap-2">
                         {project.tags.map((tag) => (
                             <Badge key={tag} className="px-2 py-1" variant="secondary">

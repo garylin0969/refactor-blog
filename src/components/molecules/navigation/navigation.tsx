@@ -16,19 +16,19 @@ interface NavigationProps {
     linkClassName?: string;
 }
 
-const Navigation = ({
-    menuClassName,
-    listClassName,
-    itemClassName,
-    linkClassName = cn(navigationMenuTriggerStyle(), 'font-bold'),
-}: NavigationProps) => {
+const Navigation = ({ menuClassName, listClassName, itemClassName, linkClassName }: NavigationProps) => {
     return (
         <NavigationMenu className={menuClassName}>
             <NavigationMenuList className={listClassName}>
                 {NAVIGATION_ROUTES.map((route) => (
                     <NavigationMenuItem key={route.href} className={itemClassName}>
-                        <NavigationMenuLink asChild className={linkClassName}>
-                            <Link href={route.href}>{route.label}</Link>
+                        <NavigationMenuLink asChild>
+                            <Link
+                                href={route.href}
+                                className={cn(navigationMenuTriggerStyle(), 'font-bold', linkClassName)}
+                            >
+                                {route.label}
+                            </Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}

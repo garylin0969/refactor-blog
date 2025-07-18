@@ -22,7 +22,12 @@ const AuthorCard = ({ className }: AuthorCardProps) => {
                     </li>
                     <li className="flex items-center gap-x-2">
                         <MailIcon className="size-4" />
-                        <a href={`mailto:${AUTHOR_INFO.email}`} target="_blank" rel="noreferrer noopener">
+                        <a
+                            className="hover:text-primary"
+                            href={`mailto:${AUTHOR_INFO.email}`}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                        >
                             <span>{AUTHOR_INFO.email}</span>
                         </a>
                     </li>
