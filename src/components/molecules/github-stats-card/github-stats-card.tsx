@@ -58,15 +58,15 @@ const buildStatsUrl = (
     // 根據模式選擇主題
     const themeParam = mode === 'dark' ? params.dark_theme : params.light_theme;
 
-    delete params.light_theme;
-    delete params.dark_theme;
-
     // 合併預設參數
     const finalParams: GithubStatsParams = {
         username,
         theme: themeParam,
         ...params,
     };
+
+    delete finalParams.light_theme;
+    delete finalParams.dark_theme;
 
     const queryString = buildQueryString(finalParams);
     return `${baseUrl}?${queryString}`;
@@ -98,7 +98,7 @@ const GithubStatsCard = ({
         return { lightUrl, darkUrl };
     }, [type, username, params]);
 
-    // 在組件掛載前，使用預設的淺色主題避免 hydration 不匹配
+    // 在元件掛載前，使用預設的淺色主題避免 hydration 不匹配
     if (!mounted) {
         return <NextImage src={lightUrl} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
     }
