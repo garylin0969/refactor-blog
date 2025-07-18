@@ -19,7 +19,8 @@ export const GITHUB_STATS_THEMES = {
 } as const;
 
 export const DEFAULT_GITHUB_STATS_CONFIG: GithubStatsConfig = {
-    theme: GITHUB_STATS_THEMES.default,
+    light_theme: GITHUB_STATS_THEMES.default,
+    dark_theme: GITHUB_STATS_THEMES.dark,
     bg_color: '00000000',
     hide_border: true,
 };

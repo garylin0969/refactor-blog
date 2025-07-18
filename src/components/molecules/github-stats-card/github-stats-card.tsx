@@ -1,5 +1,6 @@
 'use client';
 
+import { useTheme } from 'next-themes';
 import NextImage from '@/components/atoms/next-image';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
 
@@ -41,14 +42,18 @@ const GithubStatsCard = ({
     loading = 'lazy',
     alt = 'GitHub stats',
 }: GithubStatsCardProps) => {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     // 構建完整的 URL
-    const buildUrl = (): string => {
+    const buildUrl = (params: GithubStatsParams, mode: 'light' | 'dark'): string => {
         const endpoint = type === 'top-langs' ? 'top-langs' : '';
         const baseUrl = `${GITHUB_STATS_URL}${endpoint ? `/${endpoint}` : ''}`;
 
         // 預設參數
         const defaultParams = {
             username,
+            theme: mode === 'dark' ? params.dark_theme : params.light_theme,
             ...params,
         };
 
@@ -56,9 +61,19 @@ const GithubStatsCard = ({
         return `${baseUrl}?${queryString}`;
     };
 
-    const url = buildUrl();
+    const lightUrl = buildUrl(params, 'light');
+    const darkUrl = buildUrl(params, 'dark');
 
-    return <NextImage src={url} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
+    return (
+        <NextImage
+            src={isDark ? darkUrl : lightUrl}
+            width={width}
+            height={height}
+            fill={fill}
+            loading={loading}
+            alt={alt}
+        />
+    );
 };
 
 export default GithubStatsCard;
