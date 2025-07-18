@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import NextImage from '@/components/atoms/next-image';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
 
@@ -83,7 +83,12 @@ const GithubStatsCard = ({
     alt = 'GitHub stats',
 }: GithubStatsCardProps) => {
     const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const [mounted, setMounted] = useState(false);
+
+    // 確保組件已掛載，避免 hydration 不匹配
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // 使用 useMemo 避免不必要的 URL 重新計算
     const { lightUrl, darkUrl } = useMemo(() => {
@@ -93,6 +98,12 @@ const GithubStatsCard = ({
         return { lightUrl, darkUrl };
     }, [type, username, params]);
 
+    // 在組件掛載前，使用預設的淺色主題避免 hydration 不匹配
+    if (!mounted) {
+        return <NextImage src={lightUrl} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
+    }
+
+    const isDark = theme === 'dark';
     const currentUrl = isDark ? darkUrl : lightUrl;
 
     return <NextImage src={currentUrl} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
