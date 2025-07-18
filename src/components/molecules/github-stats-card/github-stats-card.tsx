@@ -1,3 +1,5 @@
+'use client';
+
 import NextImage from '@/components/atoms/next-image';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
 
