@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import NextImage from '@/components/atoms/next-image';
 import AuthorCard from '@/components/molecules/author-card';
+import GithubStatsCard from '@/components/molecules/github-stats-card';
+import { DEFAULT_TOP_LANGS_CONFIG, DEFAULT_GITHUB_STATS_PARAMS } from '@/constants/github-stats';
 
 interface BlogLayoutProps {
     children: ReactNode;
@@ -12,18 +13,8 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             <div className="flex-1">{children}</div>
             <aside className="hidden w-74 space-y-4 md:block">
                 <AuthorCard />
-                <NextImage
-                    src="https://github-readme-stats.vercel.app/api/top-langs/?username=garylin0969&theme=default&bg_color=00000000&hide_border=true"
-                    width={296}
-                    height={296}
-                    alt="top languages"
-                />
-                <NextImage
-                    src="https://github-readme-stats.vercel.app/api?username=garylin0969&show_icons=true&theme=default&bg_color=00000000&hide_rank=true&hide_border=true"
-                    width={296}
-                    height={296}
-                    alt="github stats"
-                />
+                <GithubStatsCard type="top-langs" params={DEFAULT_TOP_LANGS_CONFIG} alt="top languages" />
+                <GithubStatsCard type="stats" params={DEFAULT_GITHUB_STATS_PARAMS} alt="github stats" />
             </aside>
         </div>
     );
