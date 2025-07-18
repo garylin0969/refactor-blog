@@ -23,6 +23,7 @@ export const DEFAULT_GITHUB_STATS_CONFIG: GithubStatsConfig = {
     dark_theme: GITHUB_STATS_THEMES.dark,
     bg_color: '00000000',
     hide_border: true,
+    disable_animations: true,
 };
 
 export const DEFAULT_TOP_LANGS_CONFIG: GithubStatsConfig = {
@@ -35,6 +36,5 @@ export const DEFAULT_GITHUB_STATS_PARAMS: GithubStatsConfig = {
     ...DEFAULT_GITHUB_STATS_CONFIG,
     show_icons: true,
     hide_rank: true,
-    include_all_commits: true,
     count_private: true,
 };
