@@ -12,7 +12,7 @@ const BlogStatsCard = ({ className }: BlogStatsCardProps) => {
         <Card className={cn(className)}>
             <CardContent className="flex flex-row flex-wrap items-center justify-around">
                 {BLOG_STATS_MAP.map((stats) => (
-                    <div className="space-y-2 text-center text-sm">
+                    <div key={stats?.label} className="space-y-2 text-center text-sm">
                         <div className="font-bold">{stats?.count}</div>
                         <div className="font-medium">{stats?.label}</div>
                     </div>
