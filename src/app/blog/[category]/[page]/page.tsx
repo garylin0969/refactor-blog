@@ -1,4 +1,13 @@
 import { notFound } from 'next/navigation';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 import { getPaginatedPosts } from '@/utils/post';
 
 interface BlogPageProps {
@@ -26,7 +35,32 @@ const BlogPage = async ({ params }: BlogPageProps) => {
         hasPreviousPage,
     };
 
-    return <div>page</div>;
+    return (
+        <>
+            <Pagination>
+                <PaginationContent>
+                    {pagination.hasPreviousPage && (
+                        <PaginationItem>
+                            <PaginationPrevious href="#" />
+                        </PaginationItem>
+                    )}
+                    <PaginationItem>
+                        <PaginationLink href="#">1</PaginationLink>
+                    </PaginationItem>
+                    {pagination.totalPages > 1 && (
+                        <PaginationItem>
+                            <PaginationEllipsis />
+                        </PaginationItem>
+                    )}
+                    {pagination.hasNextPage && (
+                        <PaginationItem>
+                            <PaginationNext href="#" />
+                        </PaginationItem>
+                    )}
+                </PaginationContent>
+            </Pagination>
+        </>
+    );
 };
 
 export default BlogPage;
