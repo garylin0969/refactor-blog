@@ -59,10 +59,16 @@ export const getAllTags = (options: Options = { sort: 'desc', draft: false }) =>
 };
 
 // 檢查分類是否存在
-export const isCategoryExists = (category: string) => {
-    return getAllCategories()
+export const isCategoryExists = (category: string): boolean => {
+    if (category === 'all') {
+        return true;
+    }
+
+    const valid = getAllCategories()
         ?.map((category) => category?.toLowerCase())
         ?.includes(category?.toLowerCase());
+
+    return valid;
 };
 
 /**
