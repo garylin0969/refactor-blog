@@ -4,23 +4,14 @@ interface GithubStatsConfig {
 
 export const DEFAULT_GITHUB_USERNAME = 'garylin0969';
 
-export const GITHUB_STATS_THEMES = {
-    default: 'default',
-    dark: 'dark',
-    radical: 'radical',
-    merko: 'merko',
-    gruvbox: 'gruvbox',
-    tokyonight: 'tokyonight',
-    onedark: 'onedark',
-    cobalt: 'cobalt',
-    synthwave: 'synthwave',
-    highcontrast: 'highcontrast',
-    dracula: 'dracula',
-} as const;
+/**
+ * Github Stats Card 的樣式
+ * https://github.com/anuraghazra/github-readme-stats/blob/master/themes/README.md
+ */
 
 export const DEFAULT_GITHUB_STATS_CONFIG: GithubStatsConfig = {
-    light_theme: GITHUB_STATS_THEMES.default,
-    dark_theme: GITHUB_STATS_THEMES.dark,
+    light_theme: 'buefy',
+    dark_theme: 'jolly',
     bg_color: '00000000',
     hide_border: true,
     disable_animations: true,
