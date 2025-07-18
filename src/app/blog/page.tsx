@@ -16,31 +16,16 @@ const BlogPage = () => {
 
     return (
         <div className="mx-auto max-w-5xl md:px-4">
-            <div className="grid gap-6">
+            <div className="grid">
                 {posts.map((post: Post) => {
                     return (
-                        <article key={post?.slug}>
-                            <Card className="overflow-hidden p-0">
-                                <div className="flex min-h-41">
-                                    <NextImage
-                                        src={post?.image ?? ''}
-                                        alt={post?.title}
-                                        height={164}
-                                        width={164}
-                                        className="hidden object-cover lg:block"
-                                    />
+                        <article key={post?.slug} className="mb-2">
+                            <Card className="block h-41 gap-0 overflow-hidden rounded-none p-3">
+                                <div className="flex items-center">
                                     {/* 內容區域 */}
-                                    <div className="flex flex-1 flex-col py-4">
-                                        <CardHeader className="mb-4">
-                                            <div className="flex items-center justify-between gap-x-2">
-                                                <CardTitle className="line-clamp-1 text-xl font-semibold">
-                                                    <Link
-                                                        href={`/blog/posts/${post.slug}`}
-                                                        className="hover:text-primary"
-                                                    >
-                                                        {post?.title}
-                                                    </Link>
-                                                </CardTitle>
+                                    <div className="flex flex-1 flex-col">
+                                        <CardHeader className="mb-2 gap-0">
+                                            <div className="space-y-2">
                                                 <div className="flex items-center gap-x-2">
                                                     <CardDescription>{formatDate(post.date)}</CardDescription>
                                                     {post?.category && (
@@ -49,6 +34,14 @@ const BlogPage = () => {
                                                         </Badge>
                                                     )}
                                                 </div>
+                                                <CardTitle className="line-clamp-1 text-xl font-semibold">
+                                                    <Link
+                                                        href={`/blog/posts/${post.slug}`}
+                                                        className="hover:text-primary"
+                                                    >
+                                                        {post?.title}
+                                                    </Link>
+                                                </CardTitle>
                                             </div>
                                         </CardHeader>
 
@@ -64,6 +57,17 @@ const BlogPage = () => {
                                             ))}
                                         </CardFooter>
                                     </div>
+                                    {post?.image && (
+                                        <div className="relative hidden h-[107px] w-40 overflow-hidden lg:block">
+                                            <NextImage
+                                                src={post?.image}
+                                                alt={post?.title}
+                                                height={107}
+                                                width={160}
+                                                className="object-cover duration-300 hover:scale-110"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </Card>
                         </article>
