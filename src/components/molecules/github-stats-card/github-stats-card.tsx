@@ -95,7 +95,7 @@ const GithubStatsCard = ({
 
     // 計算當前 URL
     const currentUrl = useMemo(() => {
-        const isDark = theme === 'dark';
+        const isDark = theme !== 'light';
         const themeParam = getThemeParam(params, isDark);
         const currentUrl = buildStatsUrl(type, username, params, themeParam);
 
