@@ -53,16 +53,20 @@ const BlogPage = async ({ params }: BlogPageProps) => {
                 pages.push(i);
             }
         } else {
-            // 複雜邏輯：顯示首頁、末頁、當前頁前後兩頁
+            // 根據當前頁位置決定顯示的頁碼範圍
             if (currentPage <= 3) {
-                // 當前頁在前面
+                // 當前頁在前面，顯示前 5 頁
                 pages.push(1, 2, 3, 4, 5);
             } else if (currentPage >= totalPages - 2) {
-                // 當前頁在後面
-                pages.push(totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                // 當前頁在後面，顯示後 5 頁
+                for (let i = totalPages - 4; i <= totalPages; i++) {
+                    pages.push(i);
+                }
             } else {
-                // 當前頁在中間
-                pages.push(currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2);
+                // 當前頁在中間，顯示前後各 2 頁
+                for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+                    pages.push(i);
+                }
             }
         }
 
@@ -70,6 +74,13 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     };
 
     const pageNumbers = getPageNumbers();
+
+    // 提取常用的條件判斷
+    const shouldShowEllipsis = totalPages > 5;
+    const shouldShowFirstPage = currentPage > 3 && shouldShowEllipsis;
+    const shouldShowLastPage = currentPage < totalPages - 2 && shouldShowEllipsis;
+    const shouldShowFirstEllipsis = currentPage > 4;
+    const shouldShowLastEllipsis = currentPage < totalPages - 3;
 
     return (
         <div className="mx-auto max-w-5xl px-4">
@@ -90,15 +101,15 @@ const BlogPage = async ({ params }: BlogPageProps) => {
                             </PaginationItem>
                         )}
 
-                        {/* 首頁 */}
-                        {currentPage > 3 && totalPages > 5 && (
+                        {/* 首頁與前置省略符號 */}
+                        {shouldShowFirstPage && (
                             <>
                                 <PaginationItem>
                                     <PaginationLink href={getPageUrl(1)} isActive={currentPage === 1}>
                                         1
                                     </PaginationLink>
                                 </PaginationItem>
-                                {currentPage > 4 && (
+                                {shouldShowFirstEllipsis && (
                                     <PaginationItem>
                                         <PaginationEllipsis />
                                     </PaginationItem>
@@ -115,10 +126,10 @@ const BlogPage = async ({ params }: BlogPageProps) => {
                             </PaginationItem>
                         ))}
 
-                        {/* 末頁 */}
-                        {currentPage < totalPages - 2 && totalPages > 5 && (
+                        {/* 末頁與後置省略符號 */}
+                        {shouldShowLastPage && (
                             <>
-                                {currentPage < totalPages - 3 && (
+                                {shouldShowLastEllipsis && (
                                     <PaginationItem>
                                         <PaginationEllipsis />
                                     </PaginationItem>
