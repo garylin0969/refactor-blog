@@ -1,12 +1,13 @@
 import { posts } from '@velite';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PostMeta } from '@/components/atoms/post-meta/post-meta';
+import { TagList } from '@/components/atoms/tag-list';
 import MDXContent from '@/components/molecules/mdx-content';
 
 interface PageProps {
-    params: {
+    params: Promise<{
         slug: string;
-    };
+    }>;
 }
 
 // 生成靜態參數
@@ -18,7 +19,8 @@ export async function generateStaticParams() {
 
 // 生成metadata
 export async function generateMetadata({ params }: PageProps) {
-    const post = posts.find((post) => post.slug === params.slug);
+    const { slug } = await params;
+    const post = posts?.find((post) => post?.slug === slug);
 
     if (!post) {
         return {
@@ -27,47 +29,30 @@ export async function generateMetadata({ params }: PageProps) {
     }
 
     return {
-        title: post.title,
-        description: post.description,
+        title: post?.title,
+        description: post?.description,
     };
 }
 
-const PostPage = ({ params }: PageProps) => {
-    console.log(params.slug);
+const PostPage = async ({ params }: PageProps) => {
+    const { slug } = await params;
 
-    const post = posts.find((post) => post.slug === params.slug);
+    const post = posts?.find((post) => post?.slug === slug);
 
     if (!post) {
         notFound();
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-                <Link href="/blog" className="text-blue-600 hover:text-blue-800">
-                    ← 回到部落格
-                </Link>
-            </div>
-
+        <div className="mx-auto max-w-4xl px-4">
             <article className="max-w-none">
-                <header className="mb-8">
-                    <h1 className="mb-4 text-4xl font-bold">{post.title}</h1>
-
-                    <div className="mb-4 text-gray-600">
-                        <time dateTime={post.date}>
-                            {new Date(post.date).toLocaleDateString('zh-TW', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                            })}
-                        </time>
-                    </div>
-
-                    {post.description && <p className="text-xl text-gray-700">{post.description}</p>}
+                <header className="mb-8 space-y-3">
+                    <h1 className="text-[42px] font-bold">{post?.title}</h1>
+                    <PostMeta date={post?.date} category={post?.category} />
+                    <TagList tags={post?.tags ?? []} />
                 </header>
-
-                <div className="prose max-w-none">
-                    <MDXContent code={post.code} />
+                <div className="prose md:prose-lg">
+                    <MDXContent code={post?.code} />
                 </div>
             </article>
         </div>
