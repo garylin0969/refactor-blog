@@ -1,8 +1,8 @@
-import { posts } from '@velite';
 import { notFound } from 'next/navigation';
 import { PostMeta } from '@/components/atoms/post-meta/post-meta';
 import { TagList } from '@/components/atoms/tag-list';
 import MDXContent from '@/components/molecules/mdx-content';
+import { getPostBySlug, getPublishedPosts } from '@/utils/post';
 
 interface PageProps {
     params: Promise<{
@@ -12,7 +12,7 @@ interface PageProps {
 
 // 生成靜態參數
 export async function generateStaticParams() {
-    return posts.map((post) => ({
+    return getPublishedPosts().map((post) => ({
         slug: post.slug,
     }));
 }
@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 // 生成metadata
 export async function generateMetadata({ params }: PageProps) {
     const { slug } = await params;
-    const post = posts?.find((post) => post?.slug === slug);
+    const post = getPostBySlug(slug);
 
     if (!post) {
         return {
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps) {
 const PostPage = async ({ params }: PageProps) => {
     const { slug } = await params;
 
-    const post = posts?.find((post) => post?.slug === slug);
+    const post = getPostBySlug(slug);
 
     if (!post) {
         notFound();
