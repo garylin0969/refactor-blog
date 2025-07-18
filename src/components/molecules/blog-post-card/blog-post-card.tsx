@@ -18,7 +18,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                     {/* 內容區域 */}
                     <div className="flex-1">
                         <div className="mb-3">
-                            <PostMeta date={post.date} category={post?.category} />
+                            <PostMeta useLink={false} date={post.date} category={post?.category} />
                         </div>
 
                         <h2 className="group-hover:text-primary mb-2 line-clamp-1 text-2xl leading-tight font-bold">
