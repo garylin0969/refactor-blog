@@ -26,6 +26,7 @@ export default defineConfig({
                 tags: s.array(s.string()).optional(),
                 image: s.string().optional(),
                 slug: s.slug('title'),
+                draft: s.boolean().optional(),
                 code: s.mdx(),
             }),
         },
