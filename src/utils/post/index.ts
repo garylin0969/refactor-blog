@@ -71,6 +71,25 @@ export const isCategoryExists = (category: string): boolean => {
     return valid;
 };
 
+// 獲取所有分類的統計資料
+export const getCategoryStats = (options: Options = { sort: 'desc', draft: false }) => {
+    // 獲取所有分類
+    const categories = getAllCategories(options);
+
+    // 如果沒有分類，返回空陣列
+    if (categories?.length < 1) {
+        return [];
+    }
+
+    // 獲取所有分類的統計資料
+    return categories
+        ?.map((category) => ({
+            category,
+            count: getPostByCategory(category ?? '', options)?.length,
+        }))
+        ?.filter((category) => category.count > 0);
+};
+
 /**
  * 獲取分頁文章
  * @param category 分類
