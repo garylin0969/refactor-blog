@@ -11,9 +11,9 @@ import { SKILL_LIST } from '@/constants/skills';
 
 const AboutPage = () => {
     return (
-        <div className="mx-auto max-w-6xl space-y-8">
-            <section className="space-y-8">
-                <div className="flex items-center justify-center gap-4">
+        <div className="mx-auto max-w-6xl space-y-4 md:space-y-8">
+            <section className="space-y-4 md:space-y-8">
+                <div className="flex flex-wrap items-center justify-center gap-4">
                     {/* 作者卡片 */}
                     <AuthorCard />
                     {/* Github Stats Card - Top Languages */}
@@ -30,12 +30,12 @@ const AboutPage = () => {
                 {/* 簡短介紹卡片 */}
                 <IntroCard className="mx-auto max-w-3xl" />
             </section>
-            <section className="space-y-8">
+            <section className="space-y-4 md:space-y-8">
                 <SectionTitle className="text-center">Experience</SectionTitle>
                 {/* 經歷時間軸 */}
                 <ExperienceTimeline />
             </section>
-            <section className="space-y-8">
+            <section className="space-y-4 md:space-y-8">
                 <SectionTitle className="text-center">Skills</SectionTitle>
                 {/* 技能卡片 */}
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -44,7 +44,7 @@ const AboutPage = () => {
                     ))}
                 </div>
             </section>
-            <section className="space-y-8">
+            <section className="space-y-4 md:space-y-8">
                 <SectionTitle className="text-center">Projects</SectionTitle>
                 {/* 專案卡片 */}
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
