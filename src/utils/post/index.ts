@@ -37,7 +37,7 @@ export const getPostBySlug = (slug: string) => {
 
 // 根據分類獲取文章
 export const getPostByCategory = (category: string, options: Options = { sort: 'desc', draft: false }) => {
-    const filteredPosts = posts.filter((post) => post?.category === category && post?.draft === options.draft);
+    const filteredPosts = posts.filter((post) => post?.category === category && !!post?.draft === options.draft);
     return sortPosts(filteredPosts, options.sort);
 };
 
@@ -48,12 +48,12 @@ export const getPostByTag = (tag: string) => {
 
 // 獲取所有分類
 export const getAllCategories = (options: Options = { sort: 'desc', draft: false }) => {
-    const filteredPosts = posts.filter((post) => post?.draft === options.draft);
-    return [...new Set(filteredPosts.map((post) => post?.category))];
+    const filteredPosts = posts.filter((post) => !!post?.draft === options.draft);
+    return [...new Set(filteredPosts.map((post) => post?.category).filter(Boolean))];
 };
 
 // 獲取所有標籤
 export const getAllTags = (options: Options = { sort: 'desc', draft: false }) => {
-    const filteredPosts = posts.filter((post) => post?.draft === options.draft);
-    return [...new Set(filteredPosts.flatMap((post) => post?.tags))];
+    const filteredPosts = posts.filter((post) => !!post?.draft === options.draft);
+    return [...new Set(filteredPosts.flatMap((post) => post?.tags).filter(Boolean))];
 };
