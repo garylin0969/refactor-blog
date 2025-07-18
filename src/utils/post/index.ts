@@ -100,7 +100,7 @@ export const getCategoryStats = (options: Options = { sort: 'desc', draft: false
 export const getPaginatedPosts = (
     category: string,
     page: number,
-    limit: number = 1,
+    limit: number = 10,
     options: Options = { sort: 'desc', draft: false }
 ) => {
     const posts = category === 'all' ? getPublishedPosts() : getPostByCategory(category, options);
