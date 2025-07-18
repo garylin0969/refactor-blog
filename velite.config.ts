@@ -1,5 +1,7 @@
-import rehypeShiki from '@shikijs/rehype';
 import rehypePrettyCode from 'rehype-pretty-code';
+import { Options } from 'rehype-pretty-code';
+import { createHighlighter } from 'shiki';
+import themeDark from 'shiki/dist/themes/one-dark-pro.mjs';
 import { defineConfig, s } from 'velite';
 
 export default defineConfig({
@@ -20,8 +22,17 @@ export default defineConfig({
         rehypePlugins: [
             [
                 rehypePrettyCode,
-                rehypeShiki as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-                { theme: 'one-dark-pro' },
+                {
+                    theme: themeDark,
+                    getHighlighter: createHighlighter,
+                    transformers: [
+                        {
+                            pre(node) {
+                                node.properties.rawcontent = this.source;
+                            },
+                        },
+                    ],
+                } as Options,
             ],
         ],
     },
