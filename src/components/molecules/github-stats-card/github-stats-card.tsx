@@ -25,6 +25,8 @@ interface GithubStatsCardProps {
     useCard?: boolean;
     cardClassName?: string;
     cardContentClassName?: string;
+    imageContainerClassName?: string;
+    skeletonClassName?: string;
     username?: string;
     type: StatsType;
     params?: GithubStatsParams;
@@ -73,6 +75,8 @@ const GithubStatsCard = ({
     useCard = true,
     cardClassName,
     cardContentClassName,
+    imageContainerClassName,
+    skeletonClassName,
     username = DEFAULT_GITHUB_USERNAME,
     type,
     params = {},
@@ -101,7 +105,7 @@ const GithubStatsCard = ({
     // 圖片元件
     const ImageComponent = useMemo(
         () => (
-            <div className="relative overflow-hidden" style={{ width, height }}>
+            <div className={cn('relative overflow-hidden', imageContainerClassName)} style={{ width, height }}>
                 <NextImage
                     className="object-cover"
                     src={currentUrl}
@@ -112,14 +116,14 @@ const GithubStatsCard = ({
                 />
             </div>
         ),
-        [width, height, currentUrl, loading, alt]
+        [imageContainerClassName, width, height, currentUrl, loading, alt]
     );
 
     // 骨架屏元件
     const SkeletonComponent = useMemo(() => {
         const skeletonHeight = useCard ? height + CARD_PADDING_HEIGHT : height;
-        return <Skeleton style={{ width, height: skeletonHeight }} />;
-    }, [width, height, useCard]);
+        return <Skeleton className={skeletonClassName} style={{ width, height: skeletonHeight }} />;
+    }, [skeletonClassName, width, height, useCard]);
 
     // 在元件掛載前，避免 hydration 不匹配
     if (!mounted) {
