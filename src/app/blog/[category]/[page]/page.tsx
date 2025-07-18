@@ -9,7 +9,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import { getAllCategories, getPaginatedPosts } from '@/utils/post';
+import { getPaginatedPosts } from '@/utils/post';
 
 interface BlogPageProps {
     params: Promise<{
@@ -38,13 +38,6 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     if (posts.length === 0 && currentPage > 1) {
         notFound();
     }
-
-    const pagination = {
-        totalPages,
-        currentPage,
-        hasNextPage,
-        hasPreviousPage,
-    };
 
     // 生成分頁連結
     const getPageUrl = (pageNumber: number) => `/blog/${category}/${pageNumber}`;
@@ -79,11 +72,10 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     const pageNumbers = getPageNumbers();
 
     return (
-        <div className="space-y-8">
-            {/* 文章列表 */}
-            <div className="space-y-6">
+        <div className="mx-auto max-w-5xl px-4">
+            <div className="divide-border divide-y">
                 {posts.map((post) => (
-                    <BlogPostCard key={post.slug} post={post} />
+                    <BlogPostCard key={post?.slug} post={post} />
                 ))}
             </div>
 
