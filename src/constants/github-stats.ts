@@ -19,6 +19,7 @@ export const DEFAULT_GITHUB_STATS_CONFIG: GithubStatsConfig = {
 
 export const DEFAULT_TOP_LANGS_CONFIG: GithubStatsConfig = {
     ...DEFAULT_GITHUB_STATS_CONFIG,
+    custom_title: 'Most Used in GitHub',
     // layout: 'compact',
     // langs_count: 8,
 };
