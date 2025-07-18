@@ -22,7 +22,6 @@ interface GithubStatsCardProps {
     params?: GithubStatsParams;
     width?: number;
     height?: number;
-    fill?: boolean;
     loading?: 'lazy' | 'eager';
     alt?: string;
 }
@@ -77,8 +76,7 @@ const GithubStatsCard = ({
     type,
     params = {},
     width = 296,
-    height = 296,
-    fill = false,
+    height = 190,
     loading = 'lazy',
     alt = 'github stats',
 }: GithubStatsCardProps) => {
@@ -100,13 +98,24 @@ const GithubStatsCard = ({
 
     // 在元件掛載前，使用預設的淺色主題避免 hydration 不匹配
     if (!mounted) {
-        return <NextImage src={lightUrl} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
+        return null;
     }
 
     const isDark = theme === 'dark';
     const currentUrl = isDark ? darkUrl : lightUrl;
 
-    return <NextImage src={currentUrl} width={width} height={height} fill={fill} loading={loading} alt={alt} />;
+    return (
+        <div className="relative overflow-hidden" style={{ width: width, height: height }}>
+            <NextImage
+                className="object-cover"
+                src={currentUrl}
+                fill
+                loading={loading}
+                alt={alt}
+                priority={loading === 'eager'}
+            />
+        </div>
+    );
 };
 
 export default GithubStatsCard;

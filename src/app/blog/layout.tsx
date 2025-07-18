@@ -13,8 +13,22 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             <div className="flex-1">{children}</div>
             <aside className="hidden w-74 space-y-4 md:block">
                 <AuthorCard />
-                <GithubStatsCard type="top-langs" params={DEFAULT_TOP_LANGS_CONFIG} alt="top languages" />
-                <GithubStatsCard type="stats" params={DEFAULT_GITHUB_STATS_PARAMS} alt="github stats" />
+                <GithubStatsCard
+                    type="top-langs"
+                    params={DEFAULT_TOP_LANGS_CONFIG}
+                    width={296}
+                    height={282}
+                    loading="eager"
+                    alt="top languages"
+                />
+                <GithubStatsCard
+                    type="stats"
+                    params={DEFAULT_GITHUB_STATS_PARAMS}
+                    width={296}
+                    height={190}
+                    loading="eager"
+                    alt="github stats"
+                />
             </aside>
         </div>
     );
