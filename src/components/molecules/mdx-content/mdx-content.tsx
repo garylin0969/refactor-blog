@@ -12,8 +12,15 @@ const sharedComponents: Record<string, ComponentType<any>> = {
         console.log(title);
         console.log(language);
 
-        return <figure {...props}>{children}</figure>;
+        return (
+            <div className="overflow-hidden rounded-xs bg-[#282c34]">
+                123
+                <figure {...props}>{children}</figure>
+            </div>
+        );
     },
+
+    figcaption: () => null,
 };
 
 // 將Velite生成的MDX代碼解析為React元件函數
