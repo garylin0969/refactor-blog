@@ -11,8 +11,9 @@ interface ExperienceCardProps {
 const ExperienceCard = ({ experience }: ExperienceCardProps) => (
     <Card className="gap-y-2 p-2.5">
         <CardHeader className="flex items-center gap-x-2 p-0">
+            {/* 這裡如果className不加寬高，DevTools會有警告，但實際上不會有問題 */}
             <NextImage
-                className="rounded-md bg-white"
+                className="h-16 w-16 rounded-md bg-white"
                 src={experience.image}
                 alt={experience.company}
                 width={64}
