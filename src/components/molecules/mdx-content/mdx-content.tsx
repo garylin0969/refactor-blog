@@ -1,28 +1,18 @@
 import * as runtime from 'react/jsx-runtime';
-import React from 'react';
-import { CopyButton } from '@/components/atoms/copy-button';
+import React, { ComponentType } from 'react';
 
-const sharedComponents = {
-    // 全域自定義組件
-    pre: ({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) => {
-        // 提取程式碼內容
-        const codeContent = React.Children.toArray(children)
-            .map((child) => {
-                if (React.isValidElement(child) && child.type === 'code') {
-                    // 安全地提取 children 屬性
-                    const codeChildren = (child.props as any)?.children;
-                    return React.Children.toArray(codeChildren).join('');
-                }
-                return '';
-            })
-            .join('');
+const sharedComponents: Record<string, ComponentType<any>> = {
+    figure: ({ children, ...props }) => {
+        const hasTitle = Array.isArray(children);
+        const title = hasTitle ? (children?.[0]?.props?.children ?? '') : '';
+        const language = hasTitle
+            ? (children?.[0]?.props?.['data-language'] ?? '')
+            : (children?.props?.['data-language'] ?? '');
 
-        return (
-            <pre {...props} className="group relative">
-                {children}
-                {codeContent && <CopyButton code={codeContent} />}
-            </pre>
-        );
+        console.log(title);
+        console.log(language);
+
+        return <figure {...props}>{children}</figure>;
     },
 };
 
@@ -34,7 +24,7 @@ const useMDXComponent = (code: string) => {
 
 interface MDXProps {
     code: string;
-    components?: Record<string, React.ComponentType<any>>;
+    components?: Record<string, ComponentType<any>>;
 }
 
 // MDXContent組件

@@ -19,6 +19,7 @@ export default defineConfig({
     mdx: {
         rehypePlugins: [
             [
+                rehypePrettyCode,
                 rehypeShiki as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                 { theme: 'one-dark-pro' },
             ],
