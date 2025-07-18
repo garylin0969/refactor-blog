@@ -57,3 +57,33 @@ export const getAllTags = (options: Options = { sort: 'desc', draft: false }) =>
     const filteredPosts = posts.filter((post) => !!post?.draft === options.draft);
     return [...new Set(filteredPosts.flatMap((post) => post?.tags).filter(Boolean))];
 };
+
+/**
+ * 獲取分頁文章
+ * @param category 分類
+ * @param page 頁碼
+ * @param limit 每頁文章數量
+ * @param options 選項
+ */
+export const getPaginatedPosts = (
+    category: string,
+    page: number,
+    limit: number = 10,
+    options: Options = { sort: 'desc', draft: false }
+) => {
+    const posts = getPostByCategory(category, options);
+    const totalPages = Math.ceil(posts.length / limit);
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    const paginatedPosts = posts.slice(start, end);
+
+    return {
+        posts: paginatedPosts,
+        totalPages,
+        currentPage: page,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+    };
+};
