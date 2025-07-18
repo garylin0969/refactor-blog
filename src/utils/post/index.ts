@@ -68,10 +68,10 @@ export const getAllTags = (options: Options = { sort: 'desc', draft: false }) =>
 export const getPaginatedPosts = (
     category: string,
     page: number,
-    limit: number = 10,
+    limit: number = 1,
     options: Options = { sort: 'desc', draft: false }
 ) => {
-    const posts = getPostByCategory(category, options);
+    const posts = category === 'all' ? getPublishedPosts() : getPostByCategory(category, options);
     const totalPages = Math.ceil(posts.length / limit);
 
     const start = (page - 1) * limit;
