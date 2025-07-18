@@ -1,3 +1,5 @@
+import rehypeShiki from '@shikijs/rehype';
+import rehypePrettyCode from 'rehype-pretty-code';
 import { defineConfig, s } from 'velite';
 
 export default defineConfig({
@@ -11,6 +13,16 @@ export default defineConfig({
         base: '/static/',
         name: '[name]-[hash:6].[ext]',
         clean: true,
+    },
+
+    // 設定 MDX 處理器
+    mdx: {
+        rehypePlugins: [
+            [
+                rehypeShiki as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                { theme: 'one-dark-pro' },
+            ],
+        ],
     },
 
     // 定義collections
