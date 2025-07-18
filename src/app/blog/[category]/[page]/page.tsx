@@ -1,14 +1,7 @@
 import { notFound } from 'next/navigation';
 import { BlogPostCard } from '@/components/molecules/blog-post-card';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
+import { PaginationControls } from '@/components/molecules/pagination-controls';
+import { calculatePaginationState, validatePageNumber } from '@/utils/pagination';
 import { getPaginatedPosts, isCategoryExists } from '@/utils/post';
 
 interface BlogPageProps {
@@ -22,139 +15,47 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     const { category, page } = await params;
 
     // 驗證並處理頁碼
-    const validPage = Number(page);
-    if (isNaN(validPage) || validPage < 1) {
+    const validPage = validatePageNumber(page);
+    if (!validPage) {
         notFound();
     }
 
+    // 選擇分類
     const selectedCategory = category === 'all' ? 'all' : category;
 
+    // 檢查分類是否存在
     if (!isCategoryExists(selectedCategory)) {
         notFound();
     }
 
-    const { posts, currentPage, totalPages, hasNextPage, hasPreviousPage } = getPaginatedPosts(
-        selectedCategory,
-        validPage
-    );
+    // 獲取分頁文章
+    const { posts, currentPage, totalPages } = getPaginatedPosts(selectedCategory, validPage);
 
     // 如果沒有文章，顯示 404
     if (posts.length === 0 && currentPage > 1) {
         notFound();
     }
 
+    // 計算分頁狀態
+    const paginationState = calculatePaginationState({
+        currentPage,
+        totalPages,
+    });
+
     // 生成分頁連結
     const getPageUrl = (pageNumber: number) => `/blog/${category}/${pageNumber}`;
 
-    // 生成頁碼陣列
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxPagesToShow = 5;
-
-        if (totalPages <= maxPagesToShow) {
-            // 如果總頁數不多，顯示所有頁碼
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // 根據當前頁位置決定顯示的頁碼範圍
-            if (currentPage <= 3) {
-                // 當前頁在前面，顯示前 5 頁
-                pages.push(1, 2, 3, 4, 5);
-            } else if (currentPage >= totalPages - 2) {
-                // 當前頁在後面，顯示後 5 頁
-                for (let i = totalPages - 4; i <= totalPages; i++) {
-                    pages.push(i);
-                }
-            } else {
-                // 當前頁在中間，顯示前後各 2 頁
-                for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-                    pages.push(i);
-                }
-            }
-        }
-
-        return pages;
-    };
-
-    const pageNumbers = getPageNumbers();
-
-    // 提取常用的條件判斷
-    const shouldShowEllipsis = totalPages > 5;
-    const shouldShowFirstPage = currentPage > 3 && shouldShowEllipsis;
-    const shouldShowLastPage = currentPage < totalPages - 2 && shouldShowEllipsis;
-    const shouldShowFirstEllipsis = currentPage > 4;
-    const shouldShowLastEllipsis = currentPage < totalPages - 3;
-
     return (
         <div className="mx-auto max-w-5xl px-4">
+            {/* 文章列表 */}
             <div className="divide-border divide-y">
                 {posts.map((post) => (
                     <BlogPostCard key={post?.slug} post={post} />
                 ))}
             </div>
 
-            {/* 分頁器 */}
-            {totalPages > 1 && (
-                <Pagination>
-                    <PaginationContent>
-                        {/* 上一頁 */}
-                        {hasPreviousPage && (
-                            <PaginationItem>
-                                <PaginationPrevious href={getPageUrl(currentPage - 1)} />
-                            </PaginationItem>
-                        )}
-
-                        {/* 首頁與前置省略符號 */}
-                        {shouldShowFirstPage && (
-                            <>
-                                <PaginationItem>
-                                    <PaginationLink href={getPageUrl(1)} isActive={currentPage === 1}>
-                                        1
-                                    </PaginationLink>
-                                </PaginationItem>
-                                {shouldShowFirstEllipsis && (
-                                    <PaginationItem>
-                                        <PaginationEllipsis />
-                                    </PaginationItem>
-                                )}
-                            </>
-                        )}
-
-                        {/* 頁碼 */}
-                        {pageNumbers.map((pageNumber) => (
-                            <PaginationItem key={pageNumber}>
-                                <PaginationLink href={getPageUrl(pageNumber)} isActive={pageNumber === currentPage}>
-                                    {pageNumber}
-                                </PaginationLink>
-                            </PaginationItem>
-                        ))}
-
-                        {/* 末頁與後置省略符號 */}
-                        {shouldShowLastPage && (
-                            <>
-                                {shouldShowLastEllipsis && (
-                                    <PaginationItem>
-                                        <PaginationEllipsis />
-                                    </PaginationItem>
-                                )}
-                                <PaginationItem>
-                                    <PaginationLink href={getPageUrl(totalPages)} isActive={currentPage === totalPages}>
-                                        {totalPages}
-                                    </PaginationLink>
-                                </PaginationItem>
-                            </>
-                        )}
-
-                        {/* 下一頁 */}
-                        {hasNextPage && (
-                            <PaginationItem>
-                                <PaginationNext href={getPageUrl(currentPage + 1)} />
-                            </PaginationItem>
-                        )}
-                    </PaginationContent>
-                </Pagination>
-            )}
+            {/* 分頁控制器 */}
+            <PaginationControls paginationState={paginationState} getPageUrl={getPageUrl} />
         </div>
     );
 };
