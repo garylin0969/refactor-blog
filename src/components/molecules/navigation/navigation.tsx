@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
     NavigationMenu,
     NavigationMenuList,
@@ -17,6 +20,19 @@ interface NavigationProps {
 }
 
 const Navigation = ({ menuClassName, listClassName, itemClassName, linkClassName }: NavigationProps) => {
+    const pathname = usePathname();
+
+    // 判斷是否為當前頁面
+    const isActive = (href: string) => {
+        // 根目錄
+        if (href === '/') {
+            return pathname === href;
+        }
+
+        // 其他頁面
+        return pathname?.startsWith(href);
+    };
+
     return (
         <NavigationMenu className={menuClassName}>
             <NavigationMenuList className={listClassName}>
@@ -25,7 +41,12 @@ const Navigation = ({ menuClassName, listClassName, itemClassName, linkClassName
                         <NavigationMenuLink asChild>
                             <Link
                                 href={route.href}
-                                className={cn(navigationMenuTriggerStyle(), 'font-bold', linkClassName)}
+                                className={cn(
+                                    navigationMenuTriggerStyle(),
+                                    'hover:text-primary data-[active=true]:text-primary font-bold',
+                                    linkClassName
+                                )}
+                                data-active={isActive(route.href)}
                             >
                                 {route.label}
                             </Link>

@@ -20,7 +20,7 @@ const Header = () => {
 
                 {/* 桌面版導航 */}
                 <div className={HEADER_STYLES.desktopNav}>
-                    <Navigation linkClassName="hover:text-primary" />
+                    <Navigation />
                     <SocialLinks />
                     <ThemeToggle />
                 </div>
