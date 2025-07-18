@@ -16,7 +16,7 @@ interface PaginationControlsProps {
 }
 
 /**
- * 分頁控制器組件
+ * 分頁控制器元件
  * 負責渲染分頁導航元素
  */
 export const PaginationControls = ({ paginationState, getPageUrl, className }: PaginationControlsProps) => {

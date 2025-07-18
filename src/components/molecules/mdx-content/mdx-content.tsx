@@ -16,7 +16,7 @@ const sharedComponents: Record<string, ComponentType<any>> = {
     },
 };
 
-// 將Velite生成的MDX代碼解析為React組件函數
+// 將Velite生成的MDX代碼解析為React元件函數
 const useMDXComponent = (code: string) => {
     const fn = new Function(code);
     return fn({ ...runtime }).default;
@@ -27,7 +27,7 @@ interface MDXProps {
     components?: Record<string, ComponentType<any>>;
 }
 
-// MDXContent組件
+// MDXContent元件
 const MDXContent = ({ code, components }: MDXProps) => {
     const Component = useMDXComponent(code);
     return <Component components={{ ...sharedComponents, ...components }} />;
