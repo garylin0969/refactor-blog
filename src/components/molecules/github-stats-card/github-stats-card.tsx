@@ -1,23 +1,25 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useMemo, useEffect, useState, ReactNode } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import NextImage from '@/components/atoms/next-image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
 import { cn } from '@/utils/shadcn';
 
-const GITHUB_STATS_URL = 'https://github-readme-stats.vercel.app/api';
-const STATS_ENDPOINT = '';
-const TOP_LANGS_ENDPOINT = 'top-langs';
-
-interface GithubStatsParams {
-    [key: string]: string | number | boolean | undefined;
-}
+const GITHUB_STATS_URL = 'https://github-readme-stats.vercel.app/api'; // Github Stats API URL
+const TOP_LANGS_ENDPOINT = 'top-langs'; // Github Stats API Top Languages Endpoint
+const CARD_PADDING_HEIGHT = 48; // Shadcn Card Padding Height
 
 // 統計卡片類型
 type StatsType = 'stats' | 'top-langs';
+
+interface GithubStatsParams {
+    [key: string]: string | number | boolean | undefined;
+    light_theme?: string;
+    dark_theme?: string;
+}
 
 interface GithubStatsCardProps {
     useCard?: boolean;
@@ -45,36 +47,26 @@ const buildQueryString = (params: GithubStatsParams): string => {
     return queryParams.toString();
 };
 
-// 根據統計類型獲取對應的 API 端點
-const getEndpoint = (type: StatsType): string => {
-    return type === 'top-langs' ? TOP_LANGS_ENDPOINT : STATS_ENDPOINT;
-};
-
 // 構建完整的 GitHub Stats API URL
-const buildStatsUrl = (
-    type: StatsType,
-    username: string,
-    params: GithubStatsParams,
-    mode: 'light' | 'dark'
-): string => {
-    const endpoint = getEndpoint(type);
+const buildStatsUrl = (type: StatsType, username: string, params: GithubStatsParams, theme: string): string => {
+    const endpoint = type === 'top-langs' ? TOP_LANGS_ENDPOINT : '';
     const baseUrl = `${GITHUB_STATS_URL}${endpoint ? `/${endpoint}` : ''}`;
 
-    // 根據模式選擇主題
-    const themeParam = mode === 'dark' ? params.dark_theme : params.light_theme;
-
-    // 合併預設參數
+    // 準備最終參數，移除主題相關的特殊參數
+    const { light_theme, dark_theme, ...restParams } = params;
     const finalParams: GithubStatsParams = {
         username,
-        theme: themeParam,
-        ...params,
+        theme,
+        ...restParams,
     };
-
-    delete finalParams.light_theme;
-    delete finalParams.dark_theme;
 
     const queryString = buildQueryString(finalParams);
     return `${baseUrl}?${queryString}`;
+};
+
+// 根據主題模式獲取對應的主題參數
+const getThemeParam = (params: GithubStatsParams, isDark: boolean): string => {
+    return isDark ? params.dark_theme || 'dark' : params.light_theme || 'default';
 };
 
 const GithubStatsCard = ({
@@ -92,25 +84,24 @@ const GithubStatsCard = ({
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
-    // 確保組件已掛載，避免 hydration 不匹配
+    // 確保元件已掛載
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    // 使用 useMemo 避免不必要的 URL 重新計算
-    const { lightUrl, darkUrl } = useMemo(() => {
-        const lightUrl = buildStatsUrl(type, username, params, 'light');
-        const darkUrl = buildStatsUrl(type, username, params, 'dark');
+    // 計算當前 URL
+    const currentUrl = useMemo(() => {
+        const isDark = theme === 'dark';
+        const themeParam = getThemeParam(params, isDark);
+        const currentUrl = buildStatsUrl(type, username, params, themeParam);
 
-        return { lightUrl, darkUrl };
-    }, [type, username, params]);
+        return currentUrl;
+    }, [type, username, params, theme]);
 
-    const isDark = theme === 'dark';
-    const currentUrl = isDark ? darkUrl : lightUrl;
-
-    const ImageComponent = useMemo(() => {
-        return (
-            <div className="relative overflow-hidden" style={{ width: width, height: height }}>
+    // 圖片元件
+    const ImageComponent = useMemo(
+        () => (
+            <div className="relative overflow-hidden" style={{ width, height }}>
                 <NextImage
                     className="object-cover"
                     src={currentUrl}
@@ -120,19 +111,22 @@ const GithubStatsCard = ({
                     priority={loading === 'eager'}
                 />
             </div>
-        );
-    }, [width, height, currentUrl, loading, alt]);
+        ),
+        [width, height, currentUrl, loading, alt]
+    );
+
+    // 骨架屏元件
+    const SkeletonComponent = useMemo(() => {
+        const skeletonHeight = useCard ? height + CARD_PADDING_HEIGHT : height;
+        return <Skeleton style={{ width, height: skeletonHeight }} />;
+    }, [width, height, useCard]);
 
     // 在元件掛載前，避免 hydration 不匹配
     if (!mounted) {
-        if (useCard) {
-            // 卡片類型需要額外加上卡片的 padding 高度
-            return <Skeleton style={{ width: width, height: height + 48 }} />;
-        }
-
-        return <Skeleton style={{ width: width, height: height }} />;
+        return SkeletonComponent;
     }
 
+    // 返回卡片或圖片元件
     if (useCard) {
         return (
             <Card className={cardClassName}>
