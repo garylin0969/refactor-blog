@@ -51,7 +51,7 @@ const PostPage = async ({ params }: PageProps) => {
                     <PostMeta date={post?.date} category={post?.category} />
                     <TagList tags={post?.tags ?? []} />
                 </header>
-                <div className="prose md:prose-lg">
+                <div className="prose dark:prose-invert md:prose-lg">
                     <MDXContent code={post?.code} />
                 </div>
             </article>
