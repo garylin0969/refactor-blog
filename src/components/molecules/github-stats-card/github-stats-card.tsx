@@ -1,9 +1,11 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, ReactNode } from 'react';
 import NextImage from '@/components/atoms/next-image';
+import { Card, CardContent } from '@/components/ui/card';
 import { DEFAULT_GITHUB_USERNAME } from '@/constants/github-stats';
+import { cn } from '@/utils/shadcn';
 
 const GITHUB_STATS_URL = 'https://github-readme-stats.vercel.app/api';
 const STATS_ENDPOINT = '';
@@ -17,6 +19,9 @@ interface GithubStatsParams {
 type StatsType = 'stats' | 'top-langs';
 
 interface GithubStatsCardProps {
+    useCard?: boolean;
+    cardClassName?: string;
+    cardContentClassName?: string;
     username?: string;
     type: StatsType;
     params?: GithubStatsParams;
@@ -72,6 +77,9 @@ const buildStatsUrl = (
 };
 
 const GithubStatsCard = ({
+    useCard = true,
+    cardClassName,
+    cardContentClassName,
     username = DEFAULT_GITHUB_USERNAME,
     type,
     params = {},
@@ -96,26 +104,38 @@ const GithubStatsCard = ({
         return { lightUrl, darkUrl };
     }, [type, username, params]);
 
-    // 在元件掛載前，使用預設的淺色主題避免 hydration 不匹配
+    const isDark = theme === 'dark';
+    const currentUrl = isDark ? darkUrl : lightUrl;
+
+    const ImageComponent = useMemo(() => {
+        return (
+            <div className="relative overflow-hidden" style={{ width: width, height: height }}>
+                <NextImage
+                    className="object-cover"
+                    src={currentUrl}
+                    fill
+                    loading={loading}
+                    alt={alt}
+                    priority={loading === 'eager'}
+                />
+            </div>
+        );
+    }, [width, height, currentUrl, loading, alt]);
+
+    // 在元件掛載前，避免 hydration 不匹配
     if (!mounted) {
         return null;
     }
 
-    const isDark = theme === 'dark';
-    const currentUrl = isDark ? darkUrl : lightUrl;
+    if (useCard) {
+        return (
+            <Card className={cardClassName}>
+                <CardContent className={cn('p-0', cardContentClassName)}>{ImageComponent}</CardContent>
+            </Card>
+        );
+    }
 
-    return (
-        <div className="relative overflow-hidden" style={{ width: width, height: height }}>
-            <NextImage
-                className="object-cover"
-                src={currentUrl}
-                fill
-                loading={loading}
-                alt={alt}
-                priority={loading === 'eager'}
-            />
-        </div>
-    );
+    return ImageComponent;
 };
 
 export default GithubStatsCard;
