@@ -1,18 +1,7 @@
-import { BlogPostCard } from '@/components/molecules/blog-post-card';
-import { getPublishedPosts } from '@/utils/post';
+import { redirect } from 'next/navigation';
 
-const BlogPage = () => {
-    const posts = getPublishedPosts();
-
-    return (
-        <div className="mx-auto max-w-5xl px-4">
-            <div className="divide-border divide-y">
-                {posts.map((post) => (
-                    <BlogPostCard key={post?.slug} post={post} />
-                ))}
-            </div>
-        </div>
-    );
+const page = () => {
+    redirect('/blog/all/1');
 };
 
-export default BlogPage;
+export default page;

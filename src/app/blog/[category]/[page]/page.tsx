@@ -9,7 +9,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import { getPaginatedPosts } from '@/utils/post';
+import { getPaginatedPosts, isCategoryExists } from '@/utils/post';
 
 interface BlogPageProps {
     params: Promise<{
@@ -28,6 +28,10 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     }
 
     const selectedCategory = category === 'all' ? 'all' : category;
+
+    if (!isCategoryExists(selectedCategory)) {
+        notFound();
+    }
 
     const { posts, currentPage, totalPages, hasNextPage, hasPreviousPage } = getPaginatedPosts(
         selectedCategory,

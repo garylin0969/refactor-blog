@@ -58,6 +58,13 @@ export const getAllTags = (options: Options = { sort: 'desc', draft: false }) =>
     return [...new Set(filteredPosts.flatMap((post) => post?.tags).filter(Boolean))];
 };
 
+// 檢查分類是否存在
+export const isCategoryExists = (category: string) => {
+    return getAllCategories()
+        ?.map((category) => category?.toLowerCase())
+        ?.includes(category?.toLowerCase());
+};
+
 /**
  * 獲取分頁文章
  * @param category 分類
