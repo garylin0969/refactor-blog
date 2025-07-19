@@ -1,4 +1,5 @@
 import { posts, type Post } from '@velite';
+import { POSTS_PER_PAGE } from '@/constants/site';
 
 interface Options {
     sort?: 'asc' | 'desc';
@@ -104,7 +105,7 @@ export const getCategoryStats = (options: Options = { sort: 'desc', draft: false
 export const getPaginatedPosts = (
     category: string,
     page: number,
-    limit: number = 10,
+    limit: number = POSTS_PER_PAGE,
     options: Options = { sort: 'desc', draft: false }
 ) => {
     const posts = category === 'all' ? getPublishedPosts() : getPostByCategory(category, options);
