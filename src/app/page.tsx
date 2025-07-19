@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import SectionTitle from '@/components/atoms/section-title';
 import AuthorCard from '@/components/molecules/author-card';
 import BlogPostCard from '@/components/molecules/blog-post-card';
 import IntroCard from '@/components/molecules/intro-card';
 import ProjectCard from '@/components/molecules/project-card';
+import { Button } from '@/components/ui/button';
 import { HOME_INTRO_LIST } from '@/constants/intro';
 import { PROJECT_LIST } from '@/constants/project';
 import { getLatestPosts } from '@/utils/post';
@@ -27,7 +29,7 @@ const HomePage = () => {
                 <IntroCard className="mx-auto max-w-3xl" list={HOME_INTRO_LIST} />
             </section>
             {/* 最新文章 */}
-            <section className="flex flex-1 flex-col items-center justify-center">
+            <section className="flex flex-1 flex-col items-center justify-center gap-y-2">
                 <SectionTitle>Latest Post</SectionTitle>
                 <div>
                     {latestPosts?.map((post) => (
@@ -38,6 +40,9 @@ const HomePage = () => {
                         />
                     ))}
                 </div>
+                <Link href="/blog/all/1">
+                    <Button>View All</Button>
+                </Link>
             </section>
         </div>
     );
