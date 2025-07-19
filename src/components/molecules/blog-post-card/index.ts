@@ -1,1 +1,1 @@
-export { BlogPostCard } from './blog-post-card';
+export { default } from './blog-post-card';
