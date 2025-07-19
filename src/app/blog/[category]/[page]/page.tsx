@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { BlogPostCard } from '@/components/molecules/blog-post-card';
+import BlogPostCard from '@/components/molecules/blog-post-card';
 import { PaginationControls } from '@/components/molecules/pagination-controls';
 import { calculatePaginationState, validatePageNumber } from '@/utils/pagination';
 import { getPaginatedPosts, isCategoryExists } from '@/utils/post';
