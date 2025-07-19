@@ -33,6 +33,7 @@ const sharedComponents: Record<string, ComponentType<any>> = {
     figcaption: () => null,
 
     code: ({ children, ...props }) => {
+        // 判斷是否為行內說明文字
         const isInline = typeof children === 'string';
 
         if (isInline) {
