@@ -41,7 +41,7 @@ const HomePage = () => {
                     ))}
                 </div>
                 <Link href="/blog/all/1">
-                    <Button>View All</Button>
+                    <Button variant="outline">View All</Button>
                 </Link>
             </section>
         </div>
