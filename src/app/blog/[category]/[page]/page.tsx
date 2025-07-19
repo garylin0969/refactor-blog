@@ -2,14 +2,31 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BlogPostCard from '@/components/molecules/blog-post-card';
 import { PaginationControls } from '@/components/molecules/pagination-controls';
+import { POSTS_PER_PAGE } from '@/constants/site';
 import { calculatePaginationState, validatePageNumber } from '@/utils/pagination';
-import { getPaginatedPosts, isCategoryExists } from '@/utils/post';
+import { getAllCategories, getPaginatedPosts, getPublishedPosts, isCategoryExists } from '@/utils/post';
 
-interface BlogPageProps {
-    params: Promise<{
-        category: string;
-        page: string;
-    }>;
+export async function generateStaticParams() {
+    const allPosts = getPublishedPosts();
+    const allCategories = getAllCategories();
+
+    // 預計算每個分類的文章數量，避免重複篩選
+    const categoryPostCounts = new Map<string, number>([
+        ['all', allPosts.length], // 'all' 分類包含所有文章
+        ...allCategories.map((category): [string, number] => [
+            category?.toLowerCase() || '',
+            allPosts.filter((post) => post?.category?.toLowerCase() === category?.toLowerCase()).length,
+        ]),
+    ]);
+
+    // 使用 flatMap 簡化路徑生成邏輯
+    return Array.from(categoryPostCounts.entries()).flatMap(([category, postCount]) => {
+        const totalPages = Math.ceil(postCount / POSTS_PER_PAGE);
+        return Array.from({ length: totalPages }, (_, index) => ({
+            category,
+            page: (index + 1).toString(),
+        }));
+    });
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,6 +51,13 @@ export async function generateMetadata(): Promise<Metadata> {
             images: ['/favicons/android-chrome-512x512.png'],
         },
     };
+}
+
+interface BlogPageProps {
+    params: Promise<{
+        category: string;
+        page: string;
+    }>;
 }
 
 const BlogPage = async ({ params }: BlogPageProps) => {

@@ -4,7 +4,7 @@ import { TagList } from '@/components/atoms/tag-list';
 import MDXContent from '@/components/molecules/mdx-content';
 import { getPostBySlug, getPublishedPosts } from '@/utils/post';
 
-interface PageProps {
+interface PostPageProps {
     params: Promise<{
         slug: string;
     }>;
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 }
 
 // 生成metadata
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PostPageProps) {
     const { slug } = await params;
     const post = getPostBySlug(slug);
 
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: PageProps) {
     };
 }
 
-const PostPage = async ({ params }: PageProps) => {
+const PostPage = async ({ params }: PostPageProps) => {
     const { slug } = await params;
 
     const post = getPostBySlug(slug);
