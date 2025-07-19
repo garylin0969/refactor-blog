@@ -25,6 +25,7 @@ export default defineConfig({
                 {
                     theme: themeDark,
                     getHighlighter: createHighlighter,
+                    showLineNumbers: true,
                     transformers: [
                         {
                             pre(node) {

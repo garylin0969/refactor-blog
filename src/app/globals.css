@@ -166,3 +166,37 @@
 button:not(:disabled) {
     @apply cursor-pointer;
 }
+
+/* 代碼塊行數樣式 */
+code {
+    counter-reset: line;
+}
+
+code > [data-line]::before {
+    counter-increment: line;
+    content: counter(line);
+
+    /* 行數樣式 */
+    display: inline-block;
+    width: 1rem;
+    margin-right: 2rem;
+    text-align: right;
+    color: rgba(115, 138, 148, 0.4);
+}
+
+code[data-line-numbers-max-digits='1'] > [data-line]::before {
+    width: 1rem;
+}
+
+code[data-line-numbers-max-digits='2'] > [data-line]::before {
+    width: 2rem;
+}
+
+code[data-line-numbers-max-digits='3'] > [data-line]::before {
+    width: 3rem;
+}
+
+/* 深色模式下的行數樣式 */
+.dark code > [data-line]::before {
+    color: rgba(148, 163, 184, 0.4);
+}
