@@ -12,8 +12,8 @@ interface PageProps {
 
 // 生成靜態參數
 export async function generateStaticParams() {
-    return getPublishedPosts().map((post) => ({
-        slug: post.slug,
+    return getPublishedPosts()?.map((post) => ({
+        slug: post?.slug,
     }));
 }
 
@@ -46,7 +46,7 @@ const PostPage = async ({ params }: PageProps) => {
     return (
         <div className="mx-auto max-w-4xl px-4">
             <article className="max-w-none">
-                <header className="mb-8 space-y-3">
+                <header className="mb-4 space-y-3 border-b pb-4">
                     <h1 className="text-[42px] font-bold">{post?.title}</h1>
                     <PostMeta date={post?.date} category={post?.category} />
                     <TagList tags={post?.tags ?? []} />
