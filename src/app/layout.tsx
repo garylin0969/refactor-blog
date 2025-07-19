@@ -1,8 +1,10 @@
+import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import { ReactNode } from 'react';
 import Footer from '@/components/organisms/footer';
 import Header from '@/components/organisms/header';
+import { GA_ID } from '@/constants/site';
 import { ThemeProvider } from '@/providers';
 import { cn } from '@/utils/shadcn';
 import './globals.css';
@@ -44,6 +46,7 @@ export default function RootLayout({
                         <Footer />
                     </div>
                 </ThemeProvider>
+                <GoogleAnalytics gaId={GA_ID} />
             </body>
         </html>
     );
