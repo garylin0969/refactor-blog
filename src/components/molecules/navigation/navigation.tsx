@@ -24,13 +24,16 @@ const Navigation = ({ menuClassName, listClassName, itemClassName, linkClassName
 
     // 判斷是否為當前頁面
     const isActive = (href: string) => {
-        // 根目錄
+        // 根目錄直接比較
         if (href === '/') {
-            return pathname === href;
+            return pathname === '/';
         }
 
-        // 其他頁面
-        return pathname?.startsWith(href);
+        // 比較第一個路徑段
+        const currentSection = pathname?.split('/')[1];
+        const targetSection = href?.split('/')[1];
+
+        return currentSection === targetSection;
     };
 
     return (
