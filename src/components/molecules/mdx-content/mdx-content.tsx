@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as runtime from 'react/jsx-runtime';
 import React, { ComponentType } from 'react';
 import CodeBlock from '@/components/molecules/code-block';

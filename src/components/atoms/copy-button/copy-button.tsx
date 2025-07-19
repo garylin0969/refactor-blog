@@ -24,7 +24,12 @@ const CopyButton = ({ className, content }: CopyButtonProps) => {
     };
 
     useEffect(() => {
-        return () => clearTimeout(timeout);
+        return () => {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

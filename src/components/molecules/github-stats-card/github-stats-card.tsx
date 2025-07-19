@@ -55,6 +55,7 @@ const buildStatsUrl = (type: StatsType, username: string, params: GithubStatsPar
     const baseUrl = `${GITHUB_STATS_URL}${endpoint ? `/${endpoint}` : ''}`;
 
     // 準備最終參數，移除主題相關的特殊參數
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { light_theme, dark_theme, ...restParams } = params;
     const finalParams: GithubStatsParams = {
         username,
