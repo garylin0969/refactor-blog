@@ -15,7 +15,7 @@ const HomePage = () => {
                             <AuthorCard />
                         </div>
                         <div className="flex items-center justify-center">
-                            <ProjectCard className="w-74" maxVisible={4} project={PROJECT_LIST[0]} />
+                            <ProjectCard className="w-74" badge="New" maxVisible={4} project={PROJECT_LIST[0]} />
                         </div>
                     </div>
                     {/* 簡短介紹卡片 */}
