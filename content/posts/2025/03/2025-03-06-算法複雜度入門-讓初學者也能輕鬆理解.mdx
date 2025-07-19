@@ -1,131 +1,128 @@
 ---
 category: Code
-title: 算法複雜度入門：O(n) 是什麼？讓初學者也能輕鬆理解
+title: 算法複雜度入門 - 讓初學者也能輕鬆理解
 date: 2025-03-06
-description: 用簡單易懂的方式解釋算法複雜度概念，包括 O(1)、O(n)、O(log n)、O(n²) 等，並通過生活化的例子和視覺化解釋，幫助完全沒接觸過算法的人理解如何評估程式碼效率。
-tags: ['算法', '時間複雜度', '空間複雜度', '程式效能', 'LeetCode']
+description: 大學上演算法課時，老師講什麼 O(n)、O(log n) 我都聽不懂，感覺超抽象。後來工作後才發現，其實就是在講「這個程式會跑多久」。用生活化的例子分享我的理解心得。
+tags: ['Algorithm', 'Big O Notation', 'Time Complexity', 'Programming', 'Computer Science']
 image: /blog/posts/2025/03/algorithm-complexity.png
-slug: algorithm-complexity-beginners-guide
+slug: algorithm-complexity-beginner-guide
 ---
 
-## 什麼是算法複雜度？
+## 為什麼我一開始聽不懂複雜度？
 
-想像你正在做一道菜。「算法複雜度」就像是評估這道菜需要多少時間和食材一樣。在程式設計中，我們關心兩種資源：
+記得大學上演算法課的時候，教授在台上講什麼 O(n)、O(n²)、O(log n)，我整個人都是懵的。什麼叫做「時間複雜度」？為什麼要用這些奇怪的符號？
 
-- **時間複雜度**：程式執行需要多少時間
-- **空間複雜度**：程式執行需要多少記憶體空間
+直到開始工作，寫程式遇到效能瓶頸時，我才恍然大悟：原來複雜度就是在回答一個很實際的問題 —— **「當資料變多時，我的程式會跑多久？」**
 
-我們使用「大 O 表示法」(Big O Notation) 來描述這些複雜度，例如 O(1)、O(n)、O(n²) 等。
+## 用生活例子理解複雜度
 
-## 為什麼要關心算法複雜度？
+我發現用生活中的例子來理解最容易懂：
 
-假設你有兩種方法可以完成同一個任務：
+### O(1) - 常數時間：開冰箱拿飲料
 
-- 方法 A：需要 5 分鐘
-- 方法 B：需要 5 小時
-
-顯然，方法 A 更有效率！在程式設計中也是如此，尤其是當處理大量資料時，選擇一個好的算法可能意味著程式在幾毫秒內完成，而不是等待數小時。
-
-## 常見的時間複雜度
-
-### O(1) - 常數時間
-
-**簡單解釋**：無論輸入多大，執行時間都一樣。
-
-**生活例子**：從一疊撲克牌中直接抽出最上面的一張。不管這疊牌有 10 張還是 100 張，你都只需要一個動作。
-
-**程式例子**：
+不管冰箱裡有 5 瓶飲料還是 50 瓶，你打開冰箱拿一瓶出來的時間都一樣。這就是 O(1)，執行時間不會隨著資料量變化。
 
 ```javascript
-function getFirstElement(array) {
-    return array[0]; // 只需一步，不管陣列多大
+// 陣列取值就是 O(1)
+function getFirst(arr) {
+    return arr[0]; // 不管陣列多大，都是瞬間取到
 }
 ```
 
-**視覺化**：
+### O(n) - 線性時間：點名
 
-```plaintext
-輸入大小 (n) →  1   10   100   1000
-執行時間     →  1    1     1      1
-```
-
-### O(n) - 線性時間
-
-**簡單解釋**：執行時間與輸入大小成正比。
-
-**生活例子**：檢查一疊撲克牌中是否有特定的牌。如果有 10 張牌，最壞情況下你需要看 10 張；如果有 100 張牌，最壞情況下你需要看 100 張。
-
-**程式例子**：
+老師點名，1 個學生點 1 次，10 個學生點 10 次，100 個學生點 100 次。時間跟人數成正比，這就是 O(n)。
 
 ```javascript
-function findElement(array, element) {
-    for (let i = 0; i < array.length; i++) {
-        if (array[i] === element) {
-            return true;
+// 遍歷陣列找特定值
+function findValue(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === target) {
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 ```
 
-**視覺化**：
+### O(n²) - 平方時間：每個人都要跟每個人握手
 
-```plaintext
-輸入大小 (n) →  1   10   100   1000
-執行時間     →  1   10   100   1000
-```
-
-### O(log n) - 對數時間
-
-**簡單解釋**：執行時間與輸入大小的對數成正比。
-
-**生活例子**：在一本按字母順序排列的字典中查找一個單詞。你不需要從頭到尾檢查每一頁，而是可以翻到中間，看看要找的單詞在前半部分還是後半部分，然後只在那一半中繼續查找。
-
-**程式例子**：二分搜尋法
+班上 10 個人，每個人都要跟其他人握手一次，總共需要握 45 次手。如果是 20 個人，就要握 190 次。人數變兩倍，握手次數變四倍！
 
 ```javascript
-function binarySearch(sortedArray, element) {
+// 泡沫排序就是典型的 O(n²)
+function bubbleSort(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        // 外層迴圈
+        for (let j = 0; j < arr.length - 1; j++) {
+            // 內層迴圈
+            if (arr[j] > arr[j + 1]) {
+                // 交換位置
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}
+```
+
+### O(log n) - 對數時間：猜數字遊戲
+
+我心裡想一個 1 到 100 的數字，你來猜。每次我只會說「太大」或「太小」。聰明的做法是每次猜中間值：
+
+- 第一次猜 50
+- 如果太大，下次猜 25
+- 如果太小，下次猜 75
+
+這樣最多 7 次就能猜中（因為 2⁷ = 128 > 100）。資料變多時，所需次數增加得很慢。
+
+```javascript
+// 二分搜尋就是 O(log n)
+function binarySearch(arr, target) {
     let left = 0;
-    let right = sortedArray.length - 1;
+    let right = arr.length - 1;
 
     while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
+        let mid = Math.floor((left + right) / 2);
 
-        if (sortedArray[mid] === element) {
+        if (arr[mid] === target) {
             return mid;
-        }
-
-        if (sortedArray[mid] < element) {
+        } else if (arr[mid] < target) {
             left = mid + 1;
         } else {
             right = mid - 1;
         }
     }
 
-    return -1; // 沒找到
+    return -1;
 }
 ```
 
-**視覺化**：
+## 實際工作中的應用
 
-```plaintext
-輸入大小 (n) →  1   10   100   1000
-執行時間     →  0    3     7     10
-```
+### 場景 1：用戶列表搜尋
 
-### O(n²) - 平方時間
-
-**簡單解釋**：執行時間與輸入大小的平方成正比。
-
-**生活例子**：檢查一個班級中每兩個學生是否認識對方。如果有 10 個學生，你需要檢查約 10² = 100 種組合；如果有 100 個學生，你需要檢查約 100² = 10,000 種組合。
-
-**程式例子**：
+以前我寫用戶搜尋功能，一開始很單純：
 
 ```javascript
-function hasDuplicates(array) {
-    for (let i = 0; i < array.length; i++) {
-        for (let j = 0; j < array.length; j++) {
-            if (i !== j && array[i] === array[j]) {
+// 我一開始的寫法 - O(n)
+function searchUsers(users, keyword) {
+    return users.filter((user) => user.name.toLowerCase().includes(keyword.toLowerCase()));
+}
+```
+
+用戶少的時候沒問題，但當用戶數量到 10 萬時，每次搜尋都要等好幾秒。後來改用索引和更好的搜尋算法才解決。
+
+### 場景 2：重複資料檢查
+
+檢查陣列中有沒有重複值，我的第一版：
+
+```javascript
+// 效能很差的做法 - O(n²)
+function hasDuplicates(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+            if (arr[i] === arr[j]) {
                 return true;
             }
         }
@@ -134,143 +131,174 @@ function hasDuplicates(array) {
 }
 ```
 
-**視覺化**：
-
-```plaintext
-輸入大小 (n) →  1   10   100   1000
-執行時間     →  1  100  10000  1000000
-```
-
-## 如何計算時間複雜度？
-
-計算時間複雜度時，我們關注的是當輸入變得非常大時，程式的行為。以下是一些基本規則：
-
-1. **忽略常數**：O(2n) 簡化為 O(n)，O(500) 簡化為 O(1)
-2. **只保留最高次項**：O(n² + n) 簡化為 O(n²)
-3. **忽略係數**：O(3n²) 簡化為 O(n²)
-
-### 實例分析
-
-讓我們分析一個簡單的函數：
+後來學會用 Set：
 
 ```javascript
-function example(n) {
-    let count = 0; // O(1)
-
-    for (let i = 0; i < n; i++) {
-        count += 1; // 這個循環執行 n 次，所以是 O(n)
-    }
-
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            count += 1; // 這個嵌套循環執行 n*n 次，所以是 O(n²)
-        }
-    }
-
-    return count; // O(1)
+// 改良版 - O(n)
+function hasDuplicates(arr) {
+    return new Set(arr).size !== arr.length;
 }
 ```
 
-總複雜度：O(1) + O(n) + O(n²) + O(1) = O(n²)
+效能提升超級明顯！
 
-## 常見算法的複雜度比較
+## 常見複雜度比較
 
-| 算法       | 時間複雜度 | 適用場景             |
-| ---------- | ---------- | -------------------- |
-| 簡單查找   | O(n)       | 小型資料集，無序資料 |
-| 二分查找   | O(log n)   | 已排序資料           |
-| 冒泡排序   | O(n²)      | 教學用途，小型資料集 |
-| 快速排序   | O(n log n) | 一般用途排序         |
-| 雜湊表查找 | O(1)       | 需要快速查找的場景   |
+我用一個表格來總結不同複雜度的差異：
 
-## 空間複雜度
+| 複雜度     | 10 筆資料 | 100 筆資料 | 1000 筆資料 | 實際例子 |
+| ---------- | --------- | ---------- | ----------- | -------- |
+| O(1)       | 1         | 1          | 1           | 陣列取值 |
+| O(log n)   | 3         | 7          | 10          | 二分搜尋 |
+| O(n)       | 10        | 100        | 1000        | 線性搜尋 |
+| O(n log n) | 33        | 664        | 9966        | 快速排序 |
+| O(n²)      | 100       | 10000      | 1000000     | 泡沫排序 |
 
-除了時間複雜度，我們也關心空間複雜度 - 程式執行時需要多少額外記憶體。
+看到差異了嗎？當資料量變大時，O(n²) 的執行次數會爆炸性增長！
 
-**例子**：
+## 空間複雜度也很重要
+
+除了時間複雜度，還有空間複雜度（記憶體用量）：
 
 ```javascript
-function createArray(n) {
-    const result = []; // 創建一個新陣列
-
-    for (let i = 0; i < n; i++) {
-        result.push(i); // 添加 n 個元素
+// 空間複雜度 O(1) - 只用固定的變數
+function sum(arr) {
+    let total = 0;
+    for (let num of arr) {
+        total += num;
     }
+    return total;
+}
 
-    return result; // 返回大小為 n 的陣列
+// 空間複雜度 O(n) - 建立新陣列
+function doubleArray(arr) {
+    return arr.map((x) => x * 2); // 建立一個同樣大小的新陣列
 }
 ```
 
-這個函數的空間複雜度是 O(n)，因為它創建了一個大小與輸入成正比的新陣列。
+以前我常常為了讓程式跑快一點，就建立很多暫存陣列，結果記憶體爆掉了。後來才學會要在時間和空間之間取平衡。
 
-## 如何優化你的程式碼
+## 實戰優化經驗
 
-了解算法複雜度後，你可以通過以下方法優化程式碼：
-
-1. **選擇合適的資料結構**：例如，使用雜湊表 (Hash Map) 可以將查找操作從 O(n) 優化到 O(1)
-2. **避免嵌套循環**：嘗試將 O(n²) 的算法優化為 O(n) 或 O(n log n)
-3. **使用分治法**：將大問題分解為小問題，如二分查找
-4. **使用動態規劃**：避免重複計算相同的子問題
-5. **空間換時間**：有時候使用更多記憶體可以大幅提高執行速度
-
-## 實際應用例子
-
-### 例子 1：尋找最大值
+### 1. 避免巢狀迴圈
 
 ```javascript
-// O(n) 解法
-function findMax(array) {
-    let max = array[0];
-    for (let i = 1; i < array.length; i++) {
-        if (array[i] > max) {
-            max = array[i];
-        }
-    }
-    return max;
-}
-```
-
-### 例子 2：檢查重複元素
-
-```javascript
-// O(n²) 解法 - 較慢
-function hasDuplicatesSlow(array) {
-    for (let i = 0; i < array.length; i++) {
-        for (let j = i + 1; j < array.length; j++) {
-            if (array[i] === array[j]) {
-                return true;
+// 不好的做法 - O(n²)
+function findCommon(arr1, arr2) {
+    const result = [];
+    for (let i = 0; i < arr1.length; i++) {
+        for (let j = 0; j < arr2.length; j++) {
+            if (arr1[i] === arr2[j]) {
+                result.push(arr1[i]);
             }
         }
     }
-    return false;
+    return result;
 }
 
-// O(n) 解法 - 較快
-function hasDuplicatesFast(array) {
-    const seen = new Set();
-    for (let item of array) {
-        if (seen.has(item)) {
-            return true;
-        }
-        seen.add(item);
-    }
-    return false;
+// 改良版 - O(n + m)
+function findCommon(arr1, arr2) {
+    const set2 = new Set(arr2);
+    return arr1.filter(item => set2.has(item));
 }
 ```
+
+### 2. 善用內建方法
+
+很多內建方法都已經優化過了：
+
+```javascript
+// 自己寫的排序 - 很可能是 O(n²)
+function mySort(arr) {
+    // 泡沫排序或插入排序
+}
+
+// 使用內建排序 - O(n log n)
+arr.sort((a, b) => a - b);
+```
+
+### 3. 提前終止
+
+```javascript
+// 找到第一個符合條件就停止
+function findFirst(arr, condition) {
+    for (let item of arr) {
+        if (condition(item)) {
+            return item; // 找到就立刻回傳，不用繼續找
+        }
+    }
+    return null;
+}
+```
+
+## 常見的陷阱
+
+### 1. 字串拼接
+
+```javascript
+// 這個看起來很單純，但其實是 O(n²)
+function joinStrings(arr) {
+    let result = '';
+    for (let str of arr) {
+        result += str; // 每次拼接都要重新建立字串
+    }
+    return result;
+}
+
+// 改用 join() - O(n)
+function joinStrings(arr) {
+    return arr.join('');
+}
+```
+
+### 2. 在迴圈中呼叫昂貴的操作
+
+```javascript
+// 不好的做法
+for (let i = 0; i < arr.length; i++) {
+    // 每次迴圈都重新計算 length
+    // 如果 arr.length 是動態計算的，就很浪費
+}
+
+// 改良版
+const len = arr.length; // 先算好
+for (let i = 0; i < len; i++) {
+    // ...
+}
+```
+
+## 什麼時候需要關心複雜度？
+
+### 資料量小的時候（< 1000 筆）
+
+老實說，O(n) 和 O(n²) 可能感覺不出差別。這時候程式碼的可讀性比效能更重要。
+
+### 資料量大的時候（> 10000 筆）
+
+這時候複雜度的差異就很明顯了。一個 O(n²) 的算法可能會讓用戶等到懷疑人生。
+
+### 即時系統
+
+如果是遊戲或即時聊天，即使資料不多，也要考慮每個操作的延遲。
+
+## 我的學習建議
+
+1. **先理解概念，再背公式**：知道為什麼比知道是什麼更重要
+2. **從實際例子出發**：遇到效能問題時，分析看看是不是複雜度的問題
+3. **善用工具**：瀏覽器的開發者工具可以幫你找出效能瓶頸
+4. **不要過早優化**：先讓程式跑起來，有問題再優化
 
 ## 總結
 
-理解算法複雜度是成為優秀程式設計師的關鍵一步。通過學習大 O 表示法，你可以：
+算法複雜度其實不是什麼高深的理論，就是「預測程式執行時間」的工具。重點是：
 
-- 評估程式碼的效率
-- 預測程式在大型輸入下的表現
-- 選擇最適合特定問題的算法
-- 優化現有程式碼以提高性能
+- **O(1)**：不管資料多少，時間固定
+- **O(log n)**：資料變多，時間增加得很慢
+- **O(n)**：時間跟資料量成正比
+- **O(n²)**：資料變兩倍，時間變四倍
 
-記住，最快的算法不一定總是最好的選擇。有時候，程式碼的可讀性、維護性和開發時間也同樣重要。在實際工作中，你需要在效率和這些因素之間找到平衡。
+在實際工作中，大部分時間我們追求的是 O(1) 或 O(log n) 的查詢，O(n) 的遍歷，以及 O(n log n) 的排序。避開 O(n²) 就能解決大部分效能問題。
 
-## 進一步學習資源
+記住：好的算法不是為了炫技，而是為了讓用戶有更好的體驗！
 
-- **[Big-O Cheat Sheet](https://www.bigocheatsheet.com/)** - 視覺化不同算法的複雜度
-- **[LeetCode](https://leetcode.com/)** - 練習不同複雜度的算法問題
-- **[Visualgo](https://visualgo.net/)** - 算法視覺化工具
+有任何問題歡迎討論，一起進步！

@@ -2,26 +2,40 @@
 category: Code
 title: Next.js 中的 robots 和 sitemap 使用指南
 date: 2025-02-22
-description: 本文將介紹如何在 Next.js 中使用 robots.txt 和 sitemap.xml，幫助新手設置網站的搜索引擎爬蟲規則和網站地圖。
+description: 做好網站後想說提交給 Google 收錄，結果發現需要 robots.txt 和 sitemap.xml。研究了一下發現 Next.js 13+ 可以用程式碼自動生成，超方便！分享我的設定心得。
 tags: ['Next.js', 'SEO', 'Robots.txt', 'Sitemap', 'Web Development']
 image: /blog/posts/2025/02/nextjs-robots.png
 slug: nextjs-robots-sitemap-guide
 ---
 
-## 什麼是 robots.txt 和 sitemap.xml？
+## 為什麼需要 robots.txt 和 sitemap.xml？
 
-在網站開發中，**robots.txt** 和 **sitemap.xml** 是兩個重要的文件，幫助搜索引擎爬蟲更好地理解和索引網站內容。
+剛開始做網站的時候我都不知道這兩個檔案是幹嘛的。後來想要提交網站給 Google 搜尋，才發現它們超重要：
 
-- **robots.txt**：告訴搜索引擎哪些頁面可以被爬取，哪些頁面不可以。
-- **sitemap.xml**：提供網站的結構和所有可訪問頁面的列表，幫助搜索引擎更有效地索引網站。
+**robots.txt**：告訴搜尋引擎爬蟲哪些頁面可以爬、哪些不行。就像是網站的「門禁管理」。
 
-## 在 Next.js 中使用 robots.txt
+**sitemap.xml**：提供網站的完整地圖，讓搜尋引擎知道有哪些頁面。就像是「導覽手冊」。
 
-在 Next.js 中，你可以通過創建一個 **robots.ts** 文件來生成 **robots.txt** 文件。以下是如何實現的示例：
+沒有這兩個文件，搜尋引擎可能會:
 
-### 創建 robots.ts 文件
+- 爬取不該被索引的頁面（比如管理後台）
+- 遺漏一些重要的頁面
+- 花更多時間才能完整收錄網站內容
 
-在 **src/app** 目錄下創建 **robots.ts** 文件，並添加以下：
+## Next.js 的強大功能
+
+以前我都要手動建立這些檔案，每次加新頁面都要記得更新 sitemap。Next.js 13+ 的 App Router 提供了一個超棒的功能：可以用程式碼動態生成這些檔案！
+
+這樣的好處是：
+
+- 自動包含所有頁面
+- 新增頁面會自動更新
+- 可以根據資料庫內容動態生成
+- 不會忘記更新
+
+## 設定 robots.txt
+
+在 `src/app` 目錄下建立 `robots.ts` 檔案：
 
 ```typescript title="src/app/robots.ts"
 import { MetadataRoute } from 'next';
@@ -29,76 +43,307 @@ import { MetadataRoute } from 'next';
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
-            userAgent: '*', // 針對所有搜索引擎
-            allow: '/', // 允許訪問所有頁面
-            disallow: '/private/', // 禁止訪問私有頁面
+            userAgent: '*', // 對所有搜尋引擎有效
+            allow: '/', // 允許爬取根目錄下的所有內容
+            disallow: [
+                '/admin/', // 不要爬取管理介面
+                '/api/', // API 路由通常不需要被索引
+                '/private/', // 私人頁面
+            ],
         },
-        sitemap: 'https://www.garylin.dev/sitemap.xml', // 指向網站地圖的 URL
+        sitemap: 'https://www.garylin.dev/sitemap.xml', // 告訴爬蟲 sitemap 在哪裡
     };
 }
 ```
 
-這段告訴搜索引擎可以訪問網站的所有頁面，但禁止訪問 **/private/** 路徑下的頁面。
+### 進階設定範例
 
-## 在 Next.js 中使用 sitemap.xml
+如果需要更細緻的控制：
 
-同樣地，你可以通過創建一個 **sitemap.ts** 文件來生成 **sitemap.xml** 文件。以下是如何實現的示例：
+```typescript title="src/app/robots.ts"
+import { MetadataRoute } from 'next';
 
-### 創建 sitemap.ts 文件
+export default function robots(): MetadataRoute.Robots {
+    const baseUrl = 'https://www.garylin.dev';
 
-在 **src/app** 目錄下創建 **sitemap.ts** 文件，並添加以下：
+    return {
+        rules: [
+            {
+                userAgent: '*',
+                allow: '/',
+                disallow: ['/admin/', '/private/'],
+            },
+            {
+                userAgent: 'Googlebot', // 專門針對 Google
+                allow: '/',
+                disallow: ['/admin/', '/private/', '/test/'],
+            },
+        ],
+        sitemap: `${baseUrl}/sitemap.xml`,
+        host: baseUrl, // 主要網域
+    };
+}
+```
+
+## 設定 sitemap.xml
+
+在 `src/app` 目錄下建立 `sitemap.ts` 檔案：
 
 ```typescript title="src/app/sitemap.ts"
 import { MetadataRoute } from 'next';
-import { getAllPosts } from '@/utils/posts';
 
-// 假設有一個函數可以獲取所有文章
+export default function sitemap(): MetadataRoute.Sitemap {
+    const baseUrl = 'https://www.garylin.dev';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    // 獲取所有文章
-    const posts = getAllPosts();
-
-    // 基本頁面
-    const routes = [
+    // 靜態頁面
+    const staticRoutes = [
         {
-            url: 'https://www.garylin.dev',
+            url: baseUrl,
             lastModified: new Date(),
             changeFrequency: 'monthly' as const,
             priority: 1.0, // 首頁最重要
         },
         {
-            url: 'https://www.garylin.dev/blog/posts',
-            lastModified: new Date(),
-            changeFrequency: 'daily' as const,
-            priority: 0.9, // 部落格首頁次重要
-        },
-        {
-            url: 'https://www.garylin.dev/about',
+            url: `${baseUrl}/about`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
-            priority: 0.8, // 關於頁面
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.9, // 部落格很重要
         },
     ];
 
-    // 為每篇文章生成 sitemap 項目
-    const postRoutes = posts?.map((post) => ({
-        url: `https://www.garylin.dev/blog/posts/posts${post?.url}`,
-        lastModified: new Date(post.date),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7, // 文章頁面
-    }));
-
-    return [...routes, ...postRoutes];
+    return staticRoutes;
 }
 ```
 
-這段生成了一個網站地圖，包含首頁、部落格首頁、關於頁面以及所有文章的 URL。
+## 動態生成 sitemap（重點！）
+
+這是最實用的部分，可以根據資料庫或檔案系統動態生成：
+
+```typescript title="src/app/sitemap.ts"
+import { MetadataRoute } from 'next';
+import { getAllPosts } from '@/utils/posts';
+
+// 假設你有這個函數
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const baseUrl = 'https://www.garylin.dev';
+
+    // 靜態頁面
+    const staticRoutes = [
+        {
+            url: baseUrl,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 1.0,
+        },
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.9,
+        },
+    ];
+
+    // 動態獲取所有文章
+    const posts = await getAllPosts();
+    const postRoutes = posts.map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: new Date(post.date),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
+
+    return [...staticRoutes, ...postRoutes];
+}
+```
+
+## 實際案例：我的部落格設定
+
+這是我目前部落格用的設定，給大家參考：
+
+```typescript title="src/app/sitemap.ts"
+import { MetadataRoute } from 'next';
+import { getAllPosts } from '@/utils/posts';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const baseUrl = 'https://www.garylin.dev';
+
+    // 主要頁面
+    const mainPages = [
+        {
+            url: baseUrl,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 1.0,
+        },
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/about`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 0.8,
+        },
+    ];
+
+    // 取得所有文章
+    const posts = getAllPosts();
+    const postPages =
+        posts?.map((post) => ({
+            url: `${baseUrl}/blog/posts${post?.url}`,
+            lastModified: new Date(post.date),
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+        })) || [];
+
+    // 分類頁面
+    const categories = ['Code', 'Others'];
+    const categoryPages = categories.map((category) => ({
+        url: `${baseUrl}/blog/${category.toLowerCase()}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+    }));
+
+    return [...mainPages, ...postPages, ...categoryPages];
+}
+```
+
+## 驗證設定是否正確
+
+設定完成後，你可以透過這些方式檢查：
+
+### 1. 本地測試
+
+```bash
+# 啟動開發伺服器
+npm run dev
+
+# 檢查檔案
+curl http://localhost:3000/robots.txt
+curl http://localhost:3000/sitemap.xml
+```
+
+### 2. 使用 Google Search Console
+
+部署後到 [Google Search Console](https://search.google.com/search-console) 提交你的 sitemap。
+
+### 3. 線上驗證工具
+
+可以用一些線上工具檢查格式是否正確：
+
+- XML Sitemap Validator
+- Google Rich Results Test
+
+## 我踩過的坑
+
+### 1. 忘記設定 baseUrl
+
+一開始我的 sitemap 都是相對路徑，結果 Google 讀不到。一定要用完整的 URL！
+
+### 2. lastModified 格式錯誤
+
+我曾經傳入字串而不是 Date 物件，結果生成的時間格式不正確。
+
+### 3. 太多頁面導致 sitemap 過大
+
+Google 建議單一 sitemap 不要超過 50,000 個 URL。如果頁面太多，需要拆分成多個檔案。
+
+### 4. 動態路由沒有包含
+
+我忘記把動態路由（如 `/blog/[slug]`）的所有可能值都包含進 sitemap。
+
+## 進階技巧
+
+### 1. 多語言網站
+
+如果有多語言網站，可以這樣設定：
+
+```typescript
+export default function sitemap(): MetadataRoute.Sitemap {
+    const baseUrl = 'https://www.garylin.dev';
+    const locales = ['en', 'zh-TW'];
+
+    const routes: MetadataRoute.Sitemap = [];
+
+    locales.forEach((locale) => {
+        routes.push({
+            url: `${baseUrl}/${locale}`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 1.0,
+        });
+    });
+
+    return routes;
+}
+```
+
+### 2. 條件性包含頁面
+
+```typescript
+// 只包含已發布的文章
+const publishedPosts = posts.filter((post) => post.published);
+```
+
+### 3. 分頁處理
+
+```typescript
+// 如果有分頁功能
+const totalPages = Math.ceil(totalPosts / postsPerPage);
+for (let i = 1; i <= totalPages; i++) {
+    routes.push({
+        url: `${baseUrl}/blog/page/${i}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.5,
+    });
+}
+```
+
+## SEO 優化建議
+
+### priority 設定準則
+
+- 首頁：1.0（最高）
+- 主要分類頁：0.8-0.9
+- 文章內容：0.6-0.7
+- 一般頁面：0.5
+
+### changeFrequency 設定
+
+- 首頁、文章列表：daily
+- 文章內容：weekly
+- 關於我們：monthly
+- 很少更新的頁面：yearly
+
+## 部署後記得做這些事
+
+1. **提交到 Google Search Console**
+2. **提交到 Bing Webmaster Tools**
+3. **定期檢查是否有錯誤**
+4. **監控收錄狀況**
 
 ## 總結
 
-在 Next.js 中使用 **robots.txt** 和 **sitemap.xml** 能夠更好地管理網站的搜索引擎優化（SEO）。
+Next.js 的動態 robots.txt 和 sitemap.xml 功能真的很方便，特別是對於內容經常更新的網站。雖然一開始設定會花一點時間，但後續的維護成本幾乎是零。
 
-## 參考來源
+最重要的是記得：
 
-- **[Next.js - robots.txt](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots)**
-- **[Next.js - sitemap.xml](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap)**
+- 使用完整 URL
+- 定期檢查設定是否正確
+- 關注 Google Search Console 的反饋
+
+SEO 是長期戰，這些基本設定做好了，搜尋引擎就能更好地理解和收錄你的網站！
+
+有任何問題歡迎討論！

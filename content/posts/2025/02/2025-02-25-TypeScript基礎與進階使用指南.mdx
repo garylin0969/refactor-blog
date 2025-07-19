@@ -2,257 +2,148 @@
 category: Code
 title: TypeScript 基礎與進階使用指南
 date: 2025-02-25
-description: 這篇主要介紹 TypeScript 的基礎概念、常用工具型別如 Pick、Record、Partial 等，以及何時使用 Type 或 Interface，幫助開發者快速掌握 TypeScript。
+description: 從 JavaScript 轉到 TypeScript 的時候，我真的很抗拒寫那些型別。但用了一年後，我再也回不去了！這篇分享我從零開始學 TypeScript 的心得，以及那些真正實用的技巧。
 tags: ['TypeScript', 'JavaScript', 'Programming', 'Static Typing', 'Type System']
 image: /blog/posts/2025/02/typescript-guide.png
 slug: typescript-fundamentals-advanced-guide
 ---
 
-## 什麼是 TypeScript？
+## 我為什麼從 JavaScript 轉向 TypeScript？
 
-TypeScript 是 JavaScript 的超集，添加了靜態型別定義，可以在開發階段捕獲錯誤，提高程式碼質量和可維護性。
+說實話，剛開始接觸 TypeScript 的時候我真的很抗拒。什麼 `string`、`number`、`interface`... 明明 JavaScript 寫得好好的，為什麼要搞這麼複雜？
 
-- **靜態型別檢查**：在編譯時檢查型別錯誤，而不是運行時。
-- **更好的開發體驗**：提供自動完成、型別推斷和錯誤提示。
-- **更好的程式碼組織**：通過接口和型別定義，使程式碼結構更清晰。
+但是當我的專案越來越大，bug 也越來越多的時候，我開始懷疑人生。特別是那種「Cannot read property 'xxx' of undefined」的錯誤，總是要在瀏覽器跑起來才發現。
 
-## TypeScript 基礎型別
+後來被迫接手一個 TypeScript 專案，用了一個月後我就徹底被征服了。現在我的新專案幾乎都用 TypeScript，因為它真的能幫我在寫程式的時候就發現問題。
 
-TypeScript 提供了多種基礎型別，以下是常見的例子：
+## TypeScript 到底是什麼？
+
+簡單說，TypeScript 就是加了型別檢查的 JavaScript。你原本的 JS 程式碼幾乎都能直接用，但加上型別註解後，編輯器就能幫你抓出很多潛在的問題。
+
+**主要好處：**
+
+- **提前發現錯誤**：不用等到執行時才知道有問題
+- **更好的開發體驗**：自動完成、重構更精準
+- **程式碼更清晰**：看型別定義就知道函數要什麼參數
+
+## 基礎型別 - 先從簡單的開始
+
+剛開始我建議先搞懂這些基本型別就夠了：
 
 ```typescript
 // 基本型別
-let isDone: boolean = false;
-let decimal: number = 6;
-let color: string = 'blue';
-let list: number[] = [1, 2, 3];
-let tuple: [string, number] = ['hello', 10];
+let isFinished: boolean = false;
+let age: number = 25;
+let name: string = 'Gary';
+let hobbies: string[] = ['coding', 'gaming'];
 
-// 枚舉
-enum Color {
-    Red,
-    Green,
-    Blue,
-}
-let c: Color = Color.Green;
+// 這個我最常用，可以是多種型別之一
+let id: string | number = 123;
+id = 'abc123'; // 也可以
 
-// Any 和 Unknown
-let notSure: any = 4;
-let uncertain: unknown = 4;
-
-// Void, Null 和 Undefined
-function warnUser(): void {
-    console.log('This is a warning message');
-}
-let u: undefined = undefined;
-let n: null = null;
+// 物件型別
+let user: { name: string; age: number } = {
+    name: 'Gary',
+    age: 25,
+};
 ```
 
-## any 與 unknown 的差異
+其實最開始你不需要記住所有型別，編輯器會提示你，慢慢就熟了。
 
-TypeScript 中的 **any** 和 **unknown** 型別都可以接受任何值，但它們在型別安全性上有重要的區別：
+## any 和 unknown - 一個是地獄，一個是天堂
 
-### any 型別
+### any - 我的黑歷史
 
-**any** 型別基本上會關閉 TypeScript 的型別檢查：
+剛開始用 TS 的時候，遇到報錯我就加 `any`，想說這樣最快：
 
 ```typescript
-let anyValue: any = 10;
-anyValue = 'hello';
-anyValue = true;
-
-// 以下操作不會產生編譯錯誤，但可能在運行時出錯
-anyValue.foo.bar; // 不會報錯
-anyValue(); // 不會報錯
-anyValue.trim(); // 不會報錯
+let data: any = fetchFromAPI();
+data.user.profile.name; // 這樣寫不會報錯，但運行時可能炸掉
 ```
 
-**any** 的問題：
+結果後來發現，用太多 `any` 就失去了 TypeScript 的意義。
 
-- 繞過了型別檢查
-- 可能導致運行時錯誤
-- 失去了 IDE 的自動完成和提示功能
-- 錯誤可能在程式的其他部分才被發現
+### unknown - 更安全的選擇
 
-### unknown 型別
-
-**unknown** 是型別安全的 **any**：
+後來學會用 `unknown`，強迫我處理型別問題：
 
 ```typescript
-let unknownValue: unknown = 10;
-unknownValue = 'hello';
-unknownValue = true;
+let response: unknown = await fetch('/api/user').then((r) => r.json());
 
-// 以下操作會產生編譯錯誤
-// unknownValue.foo.bar;  // 錯誤：對象的型別為 'unknown'
-// unknownValue();        // 錯誤：對象的型別為 'unknown'
-// unknownValue.trim();   // 錯誤：對象的型別為 'unknown'
-
-// 必須先進行型別檢查或型別斷言
-if (typeof unknownValue === 'string') {
-    unknownValue.trim(); // 現在可以了
-}
-
-// 或使用型別斷言
-const stringValue = unknownValue as string;
-stringValue.trim(); // 可以，但如果實際不是字符串會在運行時出錯
-```
-
-**unknown** 的優點：
-
-- 需要先進行型別檢查或型別斷言才能使用
-- 強制開發者處理型別安全問題
-- 錯誤在編譯時就能被發現
-- 保留了型別安全性
-
-### 何時使用 any 和 unknown
-
-- **使用 unknown 當**：
-    - 你不確定變數的型別
-    - 你想保持型別安全
-    - 你計劃在使用前進行型別檢查
-
-- **使用 any 當**：
-    - 你正在快速原型開發
-    - 你正在遷移 JavaScript 程式碼到 TypeScript
-    - 你確實需要繞過型別檢查（應該盡量避免）
-
-### 實際應用示例
-
-```typescript
-// 處理 API 響應
-async function fetchData(url: string): Promise<unknown> {
-    const response = await fetch(url);
-    return response.json(); // 返回 unknown 而不是 any
-}
-
-// 使用時需要進行型別檢查
-async function processUserData() {
-    const data = await fetchData('/api/users');
-
-    // 型別保護
-    if (data && typeof data === 'object' && 'users' in data && Array.isArray(data.users)) {
-        // 現在可以安全地使用 data.users
-        return data.users.map((user) => user.name);
-    }
-
-    return [];
+// 必須先檢查型別才能使用
+if (typeof response === 'object' && response !== null && 'name' in response) {
+    console.log((response as { name: string }).name);
 }
 ```
 
-在這個例子中，使用 **unknown** 而不是 **any** 迫使我們處理可能的型別問題，使程式碼更加健壯。
+雖然麻煩一點，但安全多了。
 
-## Type vs Interface
+## Interface vs Type - 什麼時候用哪個？
 
-TypeScript 提供了兩種定義型別的方式：**type** 和 **interface**。
+這是我被問最多的問題。我的經驗法則：
 
-### 使用 Interface
-
-**Interface** 主要用於定義對象的形狀：
+### 用 Interface 當你要定義物件結構
 
 ```typescript
-// 定義接口
 interface User {
     id: number;
     name: string;
     email?: string; // 可選屬性
-    readonly createdAt: Date; // 唯讀屬性
+    readonly createdAt: Date; // 唯讀
 }
 
-// 擴展接口
+// 可以擴展
 interface Employee extends User {
     department: string;
-    salary: number;
 }
-
-// 函數接口
-interface SearchFunction {
-    (source: string, subString: string): boolean;
-}
-
-// 實現函數接口
-const searchStr: SearchFunction = (src, sub) => src.includes(sub);
 ```
 
-### 使用 Type
-
-**Type** 可以用於定義聯合型別、交叉型別和其他複雜型別：
+### 用 Type 當你要做複雜的型別操作
 
 ```typescript
 // 聯合型別
-type ID = string | number;
-
-// 交叉型別
-type AdminUser = User & { permissions: string[] };
-
-// 字面量型別
-type Direction = 'up' | 'down' | 'left' | 'right';
+type Status = 'pending' | 'success' | 'error';
 
 // 函數型別
-type ClickHandler = (event: MouseEvent) => void;
+type EventHandler = (event: MouseEvent) => void;
 
-// 使用型別別名定義對象
-type Point = {
-    x: number;
-    y: number;
-};
+// 條件型別
+type ApiResponse<T> = T extends string ? string : number;
 ```
 
-### 何時使用 Type 或 Interface？
+**我的建議：**
 
-- **使用 Interface 當**：
-    - 你需要定義一個對象的形狀
-    - 你需要擴展該型別
-    - 你需要聲明合併（同名接口會自動合併）
+- 定義物件結構 → 用 Interface
+- 其他複雜型別 → 用 Type
+- 不確定就用 Interface，大部分情況都適用
 
-- **使用 Type 當**：
-    - 你需要使用聯合型別或交叉型別
-    - 你需要使用條件型別
-    - 你需要使用映射型別
-    - 你需要使用元組型別
+## 泛型 - 讓程式碼更靈活
 
-## TypeScript 泛型
-
-泛型允許你創建可重用的組件，這些組件可以與多種型別一起工作：
+泛型是我覺得最強大但也最難理解的功能。簡單說就是「型別變數」：
 
 ```typescript
-// 泛型函數
-function identity<T>(arg: T): T {
-    return arg;
+// 不用泛型的話，每種型別都要寫一次
+function getFirstString(items: string[]): string | undefined {
+    return items[0];
+}
+function getFirstNumber(items: number[]): number | undefined {
+    return items[0];
 }
 
-// 使用泛型函數
-let output = identity<string>('myString');
-// 或者讓 TypeScript 自動推斷型別
-let output2 = identity('myString');
-
-// 泛型箭頭函數
-const getFirstElement = <T>(array: T[]): T | undefined => {
-    return array[0];
-};
-
-// 泛型接口
-interface GenericResponse<T> {
-    data: T;
-    status: number;
-    message: string;
+// 用泛型，一次搞定所有型別
+function getFirst<T>(items: T[]): T | undefined {
+    return items[0];
 }
 
-// 使用泛型接口
-const userResponse: GenericResponse<User> = {
-    data: { id: 1, name: 'John', createdAt: new Date() },
-    status: 200,
-    message: 'Success',
-};
+const firstUser = getFirst(['Alice', 'Bob']); // 型別自動推斷為 string
+const firstNumber = getFirst([1, 2, 3]); // 型別自動推斷為 number
 ```
 
-## 常用工具型別
+## 實用工具型別 - 我的日常救星
 
-TypeScript 提供了多種內置的工具型別，幫助你轉換和操作型別：
+這些工具型別我幾乎每個專案都會用到：
 
-### Partial\<T\>
-
-將型別的所有屬性設為可選：
+### Partial\<T\> - 更新資料時超好用
 
 ```typescript
 interface User {
@@ -261,351 +152,110 @@ interface User {
     email: string;
 }
 
-// 所有屬性變為可選
-type PartialUser = Partial<User>;
-// 等同於：
-// type PartialUser = {
-//     id?: number;
-//     name?: string;
-//     email?: string;
-// }
-
-// 實際應用：更新用戶信息
-function updateUser(userId: number, updates: Partial<User>) {
-    // 只需提供要更新的字段
+// 更新用戶時，不是每個欄位都要傳
+function updateUser(id: number, updates: Partial<User>) {
+    // 只需要傳想更新的欄位
 }
 
-updateUser(1, { name: 'New Name' }); // 有效
+updateUser(1, { name: 'New Name' }); // 只更新名字
 ```
 
-### Required\<T\>
-
-將型別的所有屬性設為必需：
+### Pick\<T, K\> - 只要部分屬性
 
 ```typescript
-interface Config {
-    host?: string;
-    port?: number;
-    secure?: boolean;
-}
-
-// 所有屬性變為必需
-type RequiredConfig = Required<Config>;
-// 等同於：
-// type RequiredConfig = {
-//     host: string;
-//     port: number;
-//     secure: boolean;
-// }
+// 只選擇需要的屬性
+type UserProfile = Pick<User, 'name' | 'email'>;
+// 等於：{ name: string; email: string }
 ```
 
-### Pick\<T, K\>
-
-從型別 T 中選擇一組屬性 K：
+### Record\<K, T\> - 做設定物件很棒
 
 ```typescript
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-}
+type Theme = 'light' | 'dark';
+type ThemeConfig = Record<Theme, { background: string; text: string }>;
 
-// 只選擇 id 和 name 屬性
-type UserBasicInfo = Pick<User, 'id' | 'name'>;
-// 等同於：
-// type UserBasicInfo = {
-//     id: number;
-//     name: string;
-// }
-
-// 實際應用：API 響應過濾
-function getUserPublicInfo(user: User): UserBasicInfo {
-    return {
-        id: user.id,
-        name: user.name,
-    };
-}
-```
-
-### Omit\<T, K\>
-
-從型別 T 中排除一組屬性 K：
-
-```typescript
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-}
-
-// 排除 password 屬性
-type UserPublicInfo = Omit<User, 'password'>;
-// 等同於：
-// type UserPublicInfo = {
-//     id: number;
-//     name: string;
-//     email: string;
-// }
-```
-
-### Record\<K, T\>
-
-創建一個具有指定鍵型別 K 和值型別 T 的對象型別：
-
-```typescript
-// 使用字符串作為鍵，User 作為值
-type UserRecord = Record<string, User>;
-
-// 使用特定字符串字面量作為鍵
-type Roles = 'admin' | 'user' | 'guest';
-type RoleConfig = Record<Roles, { permissions: string[] }>;
-
-// 實際應用：配置對象
-const rolePermissions: RoleConfig = {
-    admin: { permissions: ['read', 'write', 'delete'] },
-    user: { permissions: ['read', 'write'] },
-    guest: { permissions: ['read'] },
+const themes: ThemeConfig = {
+    light: { background: '#fff', text: '#000' },
+    dark: { background: '#000', text: '#fff' },
 };
 ```
 
-### Exclude\<T, U\> 和 Extract\<T, U\>
+## 在 React 中使用 TypeScript
 
-Exclude\<T, U\> 從 T 中排除可分配給 U 的型別，而 Extract\<T, U\> 從 T 中提取可分配給 U 的型別：
-
-```typescript
-type T0 = Exclude<'a' | 'b' | 'c', 'a'>; // 'b' | 'c'
-type T1 = Extract<'a' | 'b' | 'c', 'a' | 'f'>; // 'a'
-
-// 實際應用：過濾型別
-type EventType = 'click' | 'scroll' | 'mousemove';
-type MouseEventType = Extract<EventType, 'click' | 'mousemove'>; // 'click' | 'mousemove'
-```
-
-## 高級型別技巧
-
-### 條件型別
-
-根據條件選擇不同的型別：
+### 函數組件 Props
 
 ```typescript
-type IsString<T> = T extends string ? true : false;
-
-type A = IsString<string>; // true
-type B = IsString<number>; // false
-
-// 實際應用：根據輸入型別返回不同的輸出型別
-type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
-
-function createUser() {
-    return { id: 1, name: 'John' };
-}
-type User = ReturnType<typeof createUser>; // { id: number, name: string }
-```
-
-### 映射型別
-
-通過映射現有型別的每個屬性來創建新型別：
-
-```typescript
-type Readonly<T> = {
-    readonly [P in keyof T]: T[P];
-};
-
-interface User {
-    id: number;
-    name: string;
-}
-
-type ReadonlyUser = Readonly<User>;
-// 等同於：
-// type ReadonlyUser = {
-//     readonly id: number;
-//     readonly name: string;
-// }
-```
-
-## 實際應用示例
-
-### React 函數組件 Props 型別定義
-
-```typescript
-import React from 'react';
-
-// 使用 interface 定義 Props
 interface ButtonProps {
     text: string;
     onClick: () => void;
     variant?: 'primary' | 'secondary';
-    disabled?: boolean;
 }
 
-// 函數組件
-const Button: React.FC<ButtonProps> = ({
-    text,
-    onClick,
-    variant = 'primary',
-    disabled = false
-}) => {
+const Button: React.FC<ButtonProps> = ({ text, onClick, variant = 'primary' }) => {
     return (
-        <button
-            onClick={onClick}
-            className={`btn btn-${variant}`}
-            disabled={disabled}
-        >
+        <button className={`btn btn-${variant}`} onClick={onClick}>
             {text}
         </button>
     );
 };
-
-// 使用組件
-const App = () => {
-    return (
-        <Button
-            text="Click me"
-            onClick={() => console.log('Button clicked')}
-            variant="primary"
-        />
-    );
-};
 ```
 
-### 使用 React Hooks 的型別定義
+### useState 的型別
 
 ```typescript
-import React, { useState, useEffect } from 'react';
+// 簡單型別，通常會自動推斷
+const [count, setCount] = useState(0);
 
-// 定義用戶型別
-interface User {
-    id: number;
-    name: string;
-    email: string;
-}
-
-// 使用泛型 useState
-const UserProfile: React.FC = () => {
-    // 使用泛型指定 state 型別
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('/api/user/1');
-                const data = await response.json();
-                setUser(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Unknown error');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, []);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
-    if (!user) return <div>No user found</div>;
-
-    return (
-        <div>
-            <h1>{user.name}</h1>
-            <p>Email: {user.email}</p>
-        </div>
-    );
-};
+// 複雜型別需要明確指定
+const [user, setUser] = useState<User | null>(null);
+const [users, setUsers] = useState<User[]>([]);
 ```
 
-### API 響應型別定義
+## 我踩過的坑
 
-```typescript
-// 基本用戶型別
-interface User {
-    id: number;
-    name: string;
-    email: string;
-}
+### 過度使用 any
 
-// API 響應型別
-interface ApiResponse<T> {
-    data: T;
-    status: number;
-    message: string;
-    timestamp: string;
-}
+剛開始遇到型別錯誤就用 `any` 解決，結果失去了 TypeScript 的意義。
 
-// 獲取用戶列表響應
-type GetUsersResponse = ApiResponse<User[]>;
+### 不理解型別推斷
 
-// 獲取單個用戶響應
-type GetUserResponse = ApiResponse<User>;
+TypeScript 其實很聰明，很多時候不需要手動標註型別。
 
-// 使用示例
-const fetchUsers = async (): Promise<User[]> => {
-    try {
-        const response = await fetch('/api/users');
-        const result: GetUsersResponse = await response.json();
-        return result.data;
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        return [];
-    }
-};
+### 忽略編輯器提示
+
+TypeScript 的錯誤提示很有用，不要急著用 `@ts-ignore` 跳過。
+
+## 實戰建議
+
+### 1. 漸進式採用
+
+不用一開始就把所有 JS 檔案改成 TS，可以先從新功能開始。
+
+### 2. 配合 ESLint 和 Prettier
+
+```bash
+npm install @typescript-eslint/eslint-plugin @typescript-eslint/parser
 ```
 
-### 自定義 Hook 的型別定義
+### 3. 善用 IDE
 
-```typescript
-import { useState, useCallback } from 'react';
+VS Code 對 TypeScript 支援很好，錯誤提示、自動完成都很棒。
 
-// 定義自定義 Hook 的返回型別
-interface UseToggleReturn {
-    value: boolean;
-    toggle: () => void;
-    setTrue: () => void;
-    setFalse: () => void;
-}
+### 4. 讀別人的型別定義
 
-// 自定義 Hook
-function useToggle(initialValue = false): UseToggleReturn {
-    const [value, setValue] = useState<boolean>(initialValue);
+看看 @types/react、@types/node 怎麼寫的，學習最佳實踐。
 
-    const toggle = useCallback(() => setValue(v => !v), []);
-    const setTrue = useCallback(() => setValue(true), []);
-    const setFalse = useCallback(() => setValue(false), []);
+## 我的學習路徑建議
 
-    return { value, toggle, setTrue, setFalse };
-}
-
-// 使用自定義 Hook
-const ToggleComponent: React.FC = () => {
-    const { value, toggle } = useToggle();
-
-    return (
-        <button onClick={toggle}>
-            {value ? 'ON' : 'OFF'}
-        </button>
-    );
-};
-```
+1. **先從基礎型別開始**：不要急著學進階功能
+2. **在現有專案中試用**：從小地方開始加型別註解
+3. **多看錯誤訊息**：TypeScript 的錯誤訊息雖然嚇人，但很有幫助
+4. **實際應用**：理論再多不如實際寫程式
 
 ## 總結
 
-TypeScript 提供了強大的型別系統，可以幫助你寫出更安全、更可維護的程式碼。通過使用適當的型別定義、泛型和工具型別，你可以大大提高開發效率和程式碼質量。
+從 JavaScript 轉到 TypeScript 確實有學習成本，但投資報酬率很高。特別是當專案規模變大、團隊成員變多的時候，TypeScript 的價值就會顯現出來。
 
-- **基礎型別**：為變數提供型別註解
-- **Interface vs Type**：根據需求選擇合適的型別定義方式
-- **泛型**：創建可重用的型別安全組件
-- **工具型別**：使用內置工具型別轉換和操作型別
-- **高級型別技巧**：使用條件型別和映射型別解決複雜問題
+重點不是要成為 TypeScript 專家，而是要能用它來寫出更穩定、更易維護的程式碼。從基礎開始，慢慢累積經驗，很快就能體會到它的好處。
 
-## 參考來源
-
-- **[TypeScript 官方文檔](https://www.typescriptlang.org/docs/)**
-- **[TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)**
-- **[TypeScript Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)**
-- **[React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)**
+有問題歡迎交流討論！

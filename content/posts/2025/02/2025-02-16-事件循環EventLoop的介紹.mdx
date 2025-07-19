@@ -2,91 +2,221 @@
 category: Code
 title: 事件循環 (Event Loop) 的介紹
 date: 2025-02-16
-description: 本文將介紹 JavaScript 的事件循環（Event Loop）機制，幫助新手理解宏任務（Macro Task）和微任務（Micro Task）的運作方式。
+description: 記得第一次面試時被問到「JavaScript 是如何處理異步操作的」，我整個人愣住了。後來深入研究 Event Loop 才發現，原來這個看似簡單的概念背後藏著這麼多學問。
 tags: ['JavaScript', 'Event Loop', 'Async Programming', 'Web', 'Performance']
 image: /blog/posts/2025/02/event-loop.png
 slug: javascript-event-loop-introduction
 ---
 
-## 什麼是事件循環 (Event Loop)？
+## 那個讓我面試差點翻車的問題
 
-事件循環是 JavaScript 中的一個重要概念，它使得 JavaScript 能夠在單線程環境中處理異步操作。這意味著即使 JavaScript 是單線程的，它仍然可以執行多個任務，而不會阻塞主執行緒。
+記得第一次面試前端工程師的時候，面試官問了一個我覺得很簡單的問題：「JavaScript 是單線程的，那它是怎麼處理異步操作的？」
 
-## 事件循環的工作原理
+我當時心想：「這還不簡單，用 Promise、async/await 就好了啊！」結果面試官接著問：「那你知道這些異步操作內部是怎麼運作的嗎？」
 
-事件循環的工作原理可以簡單地描述為以下幾個步驟：
+我整個人愣住了。從那之後，我才認真研究事件循環這個概念。現在回頭看，真的覺得這是每個前端工程師都應該理解的基礎知識。
 
-1. **執行堆疊 (Call Stack)**：當一個函數被調用時，它會被推入執行堆疊中，並開始執行。當函數執行完成後，它會從堆疊中彈出。這種結構遵循「後進先出」（LIFO）的原則，即最後被推入堆疊的函數會最先被執行。
+## 事件循環到底是什麼？
 
-2. **任務隊列 (Task Queue)**：當異步操作（如 setTimeout、Promise 等）完成時，相關的回調函數會被推入任務隊列中，等待執行。這種結構遵循「先進先出」（FIFO）的原則，即最早進入隊列的任務會最先被執行。
+簡單來說，事件循環就是 JavaScript 處理異步操作的機制。想像一下，JavaScript 就像一個很忙的服務員，一次只能做一件事（單線程），但他有一套聰明的系統來管理所有的任務。
 
-3. **事件循環 (Event Loop)**：事件循環會不斷檢查執行堆疊是否為空。如果堆疊為空，事件循環會從任務隊列中取出第一個任務並將其推入執行堆疊中執行。
+這套系統讓 JavaScript 能夠：
 
-## 宏任務 (Macro Task) 與微任務 (Micro Task)
+- 執行當前的程式碼
+- 處理用戶點擊、網路請求等異步事件
+- 不會因為等待某個操作而整個卡住
 
-在事件循環中，任務可以分為兩種類型：宏任務和微任務。
+## 事件循環怎麼運作？
 
-### 宏任務 (Macro Task)
+我用餐廳的例子來解釋，比較容易理解：
 
-宏任務是指那些在事件循環中被處理的主要任務。這些任務包括：
+### 1. 執行堆疊 (Call Stack) - 服務員的待辦清單
 
-- **setTimeout**
-- **setInterval**
-- I/O 操作
-
-### 微任務 (Micro Task)
-
-微任務是指那些在當前任務完成後立即執行的任務。這些任務包括：
-
-- **Promise** 的回調函數
-- **MutationObserver**
-
-微任務的優先級高於宏任務，這意味著在執行下一個宏任務之前，所有的微任務都會被執行。
-
-## 事件循環的示例
-
-以下是一個簡單的示例，展示了宏任務和微任務的執行順序：
+就像服務員有一個待辦清單，最新的任務放在最上面，完成一個就劃掉一個。這就是「後進先出」（LIFO）的概念。
 
 ```javascript
-console.log('Start');
+function 點餐() {
+    console.log('客人要點餐');
+    做餐();
+}
 
-setTimeout(() => {
-    console.log('Macro Task 1');
-}, 0);
+function 做餐() {
+    console.log('廚師開始做餐');
+}
 
-Promise.resolve().then(() => {
-    console.log('Micro Task 1');
-});
-
-setTimeout(() => {
-    console.log('Macro Task 2');
-}, 0);
-
-Promise.resolve().then(() => {
-    console.log('Micro Task 2');
-});
-
-console.log('End');
+點餐(); // 先執行點餐，再執行做餐
 ```
 
-### 輸出結果
+### 2. 任務隊列 (Task Queue) - 等待處理的訂單
+
+當有異步操作完成時（比如外送到了、廚房出餐了），這些「事件」會排隊等待處理，遵循「先來先服務」（FIFO）的原則。
+
+### 3. 事件循環 (Event Loop) - 超級服務員
+
+事件循環就像一個超級服務員，他會不停地檢查：
+
+- 當前待辦清單是否空了？
+- 有沒有新的訂單需要處理？
+
+如果待辦清單空了，他就會從隊列中取出下一個任務來處理。
+
+## 宏任務 vs 微任務 - 插隊的藝術
+
+這是我最常搞混的部分！原來任務還有分等級：
+
+### 宏任務 (Macro Task) - 一般訂單
+
+- `setTimeout`、`setInterval`
+- 用戶互動事件（點擊、滾動）
+- 網路請求回應
+
+### 微任務 (Micro Task) - VIP 訂單
+
+- `Promise` 的 `.then`、`.catch`、`.finally`
+- `queueMicrotask()`
+
+**重點來了**：微任務永遠比宏任務優先！就像 VIP 客戶總是優先服務一樣。
+
+## 實際範例 - 揭開執行順序的秘密
+
+這個例子我一開始也猜錯了順序：
+
+```javascript
+console.log('開始'); // 1
+
+setTimeout(() => {
+    console.log('宏任務 1'); // 5
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log('微任務 1'); // 3
+});
+
+setTimeout(() => {
+    console.log('宏任務 2'); // 6
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log('微任務 2'); // 4
+});
+
+console.log('結束'); // 2
+```
+
+### 執行結果：
 
 ```bash
-Start
-End
-Micro Task 1
-Micro Task 2
-Macro Task 1
-Macro Task 2
+開始
+結束
+微任務 1
+微任務 2
+宏任務 1
+宏任務 2
 ```
 
-在這個例子中，首先執行了同步代碼，然後是微任務，最後才是宏任務。
+### 執行過程解析：
 
-## 總結
+1. **同步程式碼先執行**：`開始` → `結束`
+2. **檢查微任務隊列**：執行所有微任務 → `微任務 1` → `微任務 2`
+3. **檢查宏任務隊列**：執行一個宏任務 → `宏任務 1`
+4. **再次檢查微任務隊列**：沒有新的微任務
+5. **繼續執行下一個宏任務** → `宏任務 2`
 
-事件循環是 JavaScript 中處理異步操作的核心機制。理解宏任務和微任務的區別對於編寫高效的 JavaScript 代碼至關重要。希望這篇文章能幫助你更好地理解事件循環的運作方式。
+## 我在實際開發中的應用
 
-## 參考來源
+### 避免阻塞主線程
 
-- **[MDN Web Docs - Event Loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop)**
-- **[哔哩哔哩 - 2分钟了解 JavaScript Event Loop](https://b23.tv/MFuV6cn)**
+```javascript
+// ❌ 這樣會讓頁面卡住
+function heavyTask() {
+    for (let i = 0; i < 1000000; i++) {
+        // 大量計算
+    }
+}
+
+// ✅ 分批處理，不會卡住頁面
+function heavyTaskAsync(data, index = 0) {
+    const batchSize = 1000;
+    const end = Math.min(index + batchSize, data.length);
+
+    for (let i = index; i < end; i++) {
+        // 處理部分資料
+    }
+
+    if (end < data.length) {
+        setTimeout(() => heavyTaskAsync(data, end), 0);
+    }
+}
+```
+
+### 確保 DOM 更新完成
+
+```javascript
+// 更新 DOM
+element.innerHTML = 'Hello World';
+
+// 確保 DOM 更新後再執行
+Promise.resolve().then(() => {
+    console.log('DOM 已經更新完成');
+    // 現在可以安全地獲取元素尺寸
+    console.log(element.offsetHeight);
+});
+```
+
+## 我踩過的坑
+
+### 以為 setTimeout(fn, 0) 會立即執行
+
+```javascript
+console.log('1');
+setTimeout(() => console.log('2'), 0);
+console.log('3');
+
+// 結果：1 → 3 → 2
+// setTimeout 即使設定 0ms，也會在同步程式碼執行完才執行
+```
+
+### Promise 的錯誤處理時機
+
+```javascript
+Promise.resolve()
+    .then(() => {
+        throw new Error('出錯了');
+    })
+    .catch((err) => {
+        console.log('微任務中處理錯誤');
+    });
+
+console.log('同步程式碼');
+
+// 結果：同步程式碼 → 微任務中處理錯誤
+```
+
+## 為什麼要理解事件循環？
+
+### 1. 寫出更好的異步程式碼
+
+理解執行順序，就能避免時序相關的 bug。
+
+### 2. 效能優化
+
+知道什麼時候會阻塞主線程，就能寫出更流暢的程式。
+
+### 3. 面試加分
+
+這是前端面試的常見題目，理解原理比背答案更重要。
+
+### 4. 除錯更容易
+
+當異步程式碼行為異常時，你能快速定位問題。
+
+## 學習建議
+
+1. **動手實作**：用 console.log 追蹤執行順序
+2. **畫圖理解**：把 Call Stack、Task Queue 畫出來
+3. **實際應用**：在專案中注意異步操作的時機
+4. **持續練習**：多做相關的面試題
+
+記住，事件循環不是為了考試，而是為了讓我們寫出更好的 JavaScript 程式碼。理解了這個概念，你會發現很多之前搞不懂的問題突然就清楚了！
+
+有任何疑問都歡迎討論，我也是在不斷學習中！

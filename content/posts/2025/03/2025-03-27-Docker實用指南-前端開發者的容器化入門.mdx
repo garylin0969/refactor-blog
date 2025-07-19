@@ -2,119 +2,120 @@
 category: Code
 title: Docker 實用指南：前端開發者的容器化入門
 date: 2025-03-27
-description: 詳細介紹 Docker 的核心概念和實用技巧，包括容器、映像檔、Dockerfile 等，並提供 Next.js 專案的實際範例，幫助前端開發者輕鬆掌握容器化技術。
+description: 剛開始聽到 Docker 覺得是後端的東西，跟前端沒關係。直到我的 Node.js 專案在不同電腦上跑不起來，才體會到容器化的重要性。這篇分享我從零開始學 Docker 的經驗。
 tags: ['Docker', 'Next.js', 'DevOps', 'Container', 'CI/CD']
 image: /blog/posts/2025/03/docker.png
 slug: docker-practical-guide-frontend-developers
 ---
 
-## 什麼是 Docker？
+## 為什麼前端工程師也需要學 Docker？
 
-Docker 是一個開源的容器化平台，可以將應用程式和其依賴項打包成一個獨立的容器。想像一下，Docker 就像是一個標準化的貨櫃，可以將你的應用程式、資料庫、環境設定等所有需要的東西都裝在裡面，確保在任何地方都能以相同的方式運行。
+說實話，剛開始聽到 Docker 我覺得這是後端的東西，跟我一個前端有什麼關係？直到我遇到了這些問題：
 
-### Docker 的主要優點
+1. **在我的電腦可以跑，但在同事的電腦就掛掉**
+2. **部署到伺服器時環境不一樣，各種奇怪錯誤**
+3. **Node.js 版本不同，npm 套件衝突**
 
-- **一致性**：確保開發、測試和生產環境的一致性
-- **隔離性**：每個容器都是獨立的，不會互相影響
-- **可移植性**：可以在任何支援 Docker 的系統上運行
-- **輕量級**：比虛擬機更輕量，啟動更快
-- **版本控制**：可以輕鬆管理不同版本的應用程式
+後來被迫學了 Docker，才發現原來這就是傳說中的「在我電腦上正常運作」的終極解決方案。
+
+## Docker 到底是什麼？
+
+最簡單的理解：Docker 就像是一個「標準化的便當盒」。
+
+你把你的應用程式、環境設定、依賴套件全部打包在這個「便當盒」裡，然後不管在哪台電腦上，打開便當盒都是一樣的內容，一樣的味道。
+
+**為什麼這麼厲害？**
+
+- **一致性**：開發、測試、生產環境完全一樣
+- **隔離性**：不會被其他應用程式影響
+- **可移植性**：到哪都能跑
+- **輕量級**：比虛擬機器快很多
 
 ## 安裝 Docker
 
-首先，需要安裝 Docker Desktop（適用於 Windows 和 macOS）或 Docker Engine（適用於 Linux）：
+### Windows/macOS
 
-### Windows
+直接下載 Docker Desktop，一鍵安裝：
 
-1. 下載 [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
-2. 安裝並啟動 Docker Desktop
-3. 確保 WSL2 已啟用（Windows 10/11）
+- [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
+- [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)
 
-### macOS
-
-1. 下載 [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)
-2. 安裝並啟動 Docker Desktop
+安裝完後，命令列輸入 `docker --version` 確認安裝成功。
 
 ### Linux (Ubuntu)
 
 ```bash
-# 更新套件列表
-sudo apt update
-
-# 安裝必要的套件
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-
-# 添加 Docker 的官方 GPG 金鑰
+# 這個步驟比較複雜，但照著做就對了
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-# 添加 Docker 倉庫
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-# 安裝 Docker
 sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io
+sudo apt install docker-ce
 ```
 
-## Docker 基本概念
+## 核心概念 - 用比喻來理解
 
-### 1. 映像檔（Image）
+### 1. Image（映像檔）= 食譜
 
-映像檔是容器的模板，包含了運行應用程式所需的所有檔案和設定。可以將它想像成一個應用程式的「藍圖」。
+就像食譜告訴你怎麼做菜，Image 告訴 Docker 怎麼建立你的應用程式環境。
 
-### 2. 容器（Container）
+### 2. Container（容器）= 做好的菜
 
-容器是映像檔的運行實例，就像是一個正在運行的應用程式。每個容器都是獨立的，有自己的檔案系統、網路和進程空間。
+按照食譜做出來的菜就是 Container，一個正在運行的應用程式實例。
 
-### 3. Dockerfile
+### 3. Dockerfile = 詳細的食譜步驟
 
-Dockerfile 是一個文字檔案，包含了建立映像檔的指令。它定義了如何建立你的應用程式環境。
+一步一步寫明怎麼準備環境、安裝依賴、啟動應用程式。
 
-## 為 Next.js 專案建立 Dockerfile
+## 幫 Next.js 專案做 Dockerfile
 
-讓我們為一個 Next.js 專案建立 Dockerfile：
+我最常用的 Next.js Dockerfile，簡單又實用：
 
 ```dockerfile
-# 使用 Node.js 官方映像檔作為基礎
+# 選個輕量的 Node.js 環境
 FROM node:18-alpine
 
 # 設定工作目錄
 WORKDIR /app
 
-# 複製 package.json 和 package-lock.json
+# 先複製 package.json，這樣可以利用快取
 COPY package*.json ./
-
-# 安裝依賴項
 RUN npm install
 
-# 複製所有源代碼
+# 再複製其他檔案
 COPY . .
 
-# 建立生產環境的構建
+# 建置專案
 RUN npm run build
 
-# 暴露端口
+# 開放 3000 埠
 EXPOSE 3000
 
-# 啟動應用程式
+# 啟動指令
 CMD ["npm", "start"]
 ```
 
-### 建立映像檔
+### 為什麼這樣寫？
+
+1. **先複製 package.json**：利用 Docker 快取機制，依賴沒變就不用重新安裝
+2. **使用 alpine 版本**：體積小，啟動快
+3. **multi-stage build**：可以讓最終的 image 更小（進階技巧）
+
+## 建立和執行容器
 
 ```bash
-# 在專案根目錄執行
+# 建立 image
 docker build -t my-nextjs-app .
-```
 
-### 運行容器
-
-```bash
+# 執行容器
 docker run -p 3000:3000 my-nextjs-app
+
+# 在背景執行
+docker run -d -p 3000:3000 my-nextjs-app
 ```
 
-## Docker Compose：管理多個容器
+## Docker Compose - 管理多個服務
 
-Docker Compose 可以幫助你管理多個相關的容器。以下是一個包含 Next.js 應用程式和 MongoDB 的範例：
+單純一個前端應用可能不夠，通常還需要資料庫。這時候 Docker Compose 就派上用場了：
 
 ```yaml
 # docker-compose.yml
@@ -126,7 +127,7 @@ services:
         ports:
             - '3000:3000'
         environment:
-            - MONGODB_URI=mongodb://db:27017/myapp
+            - DATABASE_URL=mongodb://db:27017/myapp
         depends_on:
             - db
 
@@ -141,38 +142,35 @@ volumes:
     mongodb_data:
 ```
 
-### 使用 Docker Compose
-
 ```bash
-# 啟動所有服務
+# 一鍵啟動所有服務
 docker-compose up
 
-# 在背景運行
+# 在背景執行
 docker-compose up -d
 
 # 停止所有服務
 docker-compose down
 ```
 
-## 實用技巧和最佳實踐
+## 實用技巧分享
 
 ### 1. 使用 .dockerignore
 
-建立 `.dockerignore` 檔案來排除不需要的檔案：
+就像 .gitignore 一樣，避免把不需要的檔案放進 image：
 
 ```text
 node_modules
 .next
 .git
 .env
+README.md
 ```
 
-### 2. 多階段構建
-
-使用多階段構建來減少最終映像檔的大小：
+### 2. 多階段建置（減少 image 大小）
 
 ```dockerfile
-# 構建階段
+# 建置階段
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
@@ -180,114 +178,136 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# 生產階段
+# 執行階段
 FROM node:18-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./
+RUN npm install --production
 EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
 ### 3. 環境變數管理
 
-使用環境變數檔案來管理配置：
-
 ```bash
 # .env
 NODE_ENV=production
-MONGODB_URI=mongodb://db:27017/myapp
+API_URL=https://api.myapp.com
 ```
 
-### 4. 資料持久化
-
-使用 Docker volumes 來保存資料：
+在 docker-compose.yml 中使用：
 
 ```yaml
-# docker-compose.yml
 services:
     app:
-        volumes:
-            - .:/app
-            - /app/node_modules
+        build: .
+        env_file:
+            - .env
 ```
 
-## 常見問題和解決方案
+## 我踩過的坑
 
-### 1. 容器無法啟動
+### 1. Image 太大
 
-檢查日誌：
+一開始我的 Next.js image 有 1GB+，後來用了 alpine 版本和多階段建置，降到 200MB。
 
-```bash
-docker logs container_name
+### 2. 檔案權限問題
+
+在 Linux 上可能會遇到權限問題，解決方法：
+
+```dockerfile
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+USER nextjs
 ```
 
-### 2. 映像檔太大
+### 3. 熱重載不工作
 
-- 使用多階段構建
-- 使用 .dockerignore 排除不必要的檔案
-- 使用輕量級基礎映像檔（如 alpine）
-
-### 3. 網路問題
-
-檢查容器網路：
+開發環境時，記得掛載目錄：
 
 ```bash
-docker network ls
-docker network inspect network_name
+docker run -v $(pwd):/app -p 3000:3000 my-nextjs-app
 ```
 
 ## 部署到生產環境
 
-### 1. 使用 Docker Registry
-
-將映像檔推送到 Docker Hub 或私有 Registry：
+### 推送到 Docker Hub
 
 ```bash
-# 登入 Docker Hub
+# 登入
 docker login
 
-# 標記映像檔
+# 標記 image
 docker tag my-nextjs-app username/my-nextjs-app:latest
 
-# 推送映像檔
+# 推送
 docker push username/my-nextjs-app:latest
 ```
 
-### 2. 使用 Docker Swarm 或 Kubernetes
-
-對於大規模部署，考慮使用容器編排工具：
+### 在伺服器上執行
 
 ```bash
-# 初始化 Docker Swarm
-docker swarm init
+# 拉取最新版本
+docker pull username/my-nextjs-app:latest
 
-# 部署服務
-docker stack deploy -c docker-compose.yml myapp
+# 執行
+docker run -d -p 3000:3000 --name my-app username/my-nextjs-app:latest
 ```
 
-## 總結
+## 常用 Docker 指令
 
-Docker 是一個強大的工具，可以幫助前端開發者：
+```bash
+# 查看執行中的容器
+docker ps
 
-- 確保開發環境的一致性
-- 簡化部署流程
-- 提高應用程式的可移植性
-- 更好地管理依賴項
+# 查看所有容器
+docker ps -a
 
-通過掌握 Docker 的基本概念和實用技巧，你可以：
+# 查看 images
+docker images
 
-- 建立可靠的開發環境
-- 簡化團隊協作
-- 提高部署效率
-- 更好地管理應用程式的生命週期
+# 刪除容器
+docker rm container_id
 
-## 參考來源
+# 刪除 image
+docker rmi image_id
 
-- [Docker 官方文檔](https://docs.docker.com/)
-- [Next.js 部署文檔](https://nextjs.org/docs/deployment)
-- [Docker Compose 文檔](https://docs.docker.com/compose/)
-- [Docker Hub](https://hub.docker.com/)
+# 查看容器日誌
+docker logs container_id
+
+# 進入容器內部
+docker exec -it container_id sh
+```
+
+## 最佳實踐建議
+
+### 1. Image 優化
+
+- 使用輕量的基礎 image（alpine）
+- 利用多階段建置
+- 合併 RUN 指令減少層數
+
+### 2. 安全性
+
+- 不要在 image 中包含敏感資訊
+- 使用非 root 用戶執行應用程式
+- 定期更新基礎 image
+
+### 3. 開發效率
+
+- 使用 docker-compose 管理多服務
+- 善用 .dockerignore
+- 利用快取機制加速建置
+
+## 我的建議
+
+1. **從簡單開始**：先把現有專案容器化，不要一開始就想搞微服務
+2. **多實驗**：Docker 最好的學習方式就是動手做
+3. **關注 image 大小**：太大的 image 部署會很慢
+4. **寫好文檔**：記錄常用指令和設定，方便團隊使用
+
+Docker 對前端工程師來說真的很實用，特別是在部署和團隊協作上。雖然一開始覺得複雜，但掌握基本用法後就能大大提升開發效率。
+
+有任何問題都歡迎討論！

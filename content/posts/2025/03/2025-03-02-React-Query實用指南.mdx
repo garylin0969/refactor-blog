@@ -2,646 +2,436 @@
 category: Code
 title: React Query 實用指南：在 Next.js 和 React.js 中的數據獲取
 date: 2025-03-02
-description: 詳細介紹 React Query 的核心概念和常用 API，包括 useQuery、HydrationBoundary、prefetchQuery、QueryClient 等，並解釋 gcTime 和 staleTime 的差異，幫助開發者在 Next.js 和 React.js 應用中輕鬆實現高效的數據獲取。
+description: 以前我都用 useState + useEffect 來處理 API 呼叫，每次都要處理 loading、error、cache 很麻煩。直到遇到 React Query，才知道原來資料抓取可以這麼優雅！分享我的實戰心得。
 tags: ['React Query', 'Next.js', 'React.js', 'Data Fetching', 'TanStack Query']
 image: /blog/posts/2025/03/tanstack-query.png
 slug: react-query-practical-guide-nextjs-reactjs
 ---
 
+## 為什麼我愛上了 React Query？
+
+還記得以前每次要抓 API 資料，都要寫一堆 useState 和 useEffect：
+
+```javascript
+// 以前的我...
+const [data, setData] = useState(null);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+useEffect(() => {
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/users');
+            const result = await response.json();
+            setData(result);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchData();
+}, []);
+```
+
+每個組件都要寫一遍，cache 要自己管理，重複請求也沒辦法避免。後來同事推薦我用 React Query，我才發現原來資料抓取可以這麼簡單！
+
 ## 什麼是 React Query？
 
-React Query (現在也稱為 TanStack Query) 是一個強大的數據獲取和狀態管理庫，專為 React 應用設計，解決了前端應用中數據獲取的複雜問題。
+React Query（現在叫 TanStack Query）是專門處理伺服器狀態的函式庫。它幫你處理：
 
-- **聲明式數據獲取**：簡化 API 調用和數據管理
-- **自動緩存和重新獲取**：智能管理數據的新鮮度
-- **內置的加載和錯誤狀態**：無需手動管理這些狀態
-- **伺服器狀態同步**：保持 UI 與伺服器數據同步
+- **Cache 管理**：自動快取資料，避免重複請求
+- **背景更新**：當頁面重新聚焦時自動更新資料
+- **錯誤處理**：統一的錯誤處理機制
+- **Loading 狀態**：自動管理載入狀態
+- **樂觀更新**：先更新 UI，失敗再回復
 
-## 安裝和基本設置
+最重要的是，程式碼變得超級簡潔！
 
-首先，安裝 React Query 庫：
+## 安裝和基本設定
+
+### 安裝套件
 
 ```bash
-# npm
 npm install @tanstack/react-query
-
-# yarn
-yarn add @tanstack/react-query
-
-# pnpm
-pnpm add @tanstack/react-query
 ```
 
-### 在 React 應用中設置
+### 在 Next.js 中設定
 
-在 React 應用中，需要在應用的根部設置 `QueryClientProvider`：
+我習慣建立一個 providers 檔案來管理：
 
-```tsx
-// src/main.tsx 或 src/index.tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import ReactDOM from 'react-dom/client';
-import React from 'react';
-import App from './App';
-
-// 創建一個 QueryClient 實例
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 60 * 1000, // 1分鐘
-            gcTime: 5 * 60 * 1000, // 5分鐘
-            retry: 1, // 失敗時重試1次
-        },
-    },
-});
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <App />
-            <ReactQueryDevtools initialIsOpen={false} /> {/* 開發工具 */}
-        </QueryClientProvider>
-    </React.StrictMode>
-);
-```
-
-### 在 Next.js 應用中設置
-
-在 Next.js 中，我們通常在 `layout.tsx` (App Router) 中設置：
-
-#### App Router
-
-```tsx
-// app/providers.tsx
+```typescript title="src/providers/query-provider.tsx"
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useState } from 'react';
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 60 * 1000, // 1分鐘
-            gcTime: 5 * 60 * 1000, // 5分鐘
-        },
-    },
-});
+export default function QueryProvider({ children }: { children: React.ReactNode }) {
+    // 這樣每個用戶都有自己的 QueryClient 實例
+    const [queryClient] = useState(
+        () =>
+            new QueryClient({
+                defaultOptions: {
+                    queries: {
+                        // 5 分鐘後資料就算過期
+                        staleTime: 5 * 60 * 1000,
+                        // 快取保存 10 分鐘
+                        gcTime: 10 * 60 * 1000,
+                    },
+                },
+            })
+    );
 
-export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
             {children}
+            {/* 開發時很好用的除錯工具 */}
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 }
+```
 
-// app/layout.tsx
-import Providers from './providers';
+然後在 layout 中使用：
+
+```typescript title="src/app/layout.tsx"
+import QueryProvider from '@/providers/query-provider';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="zh-TW">
             <body>
-                <Providers>{children}</Providers>
+                <QueryProvider>
+                    {children}
+                </QueryProvider>
             </body>
         </html>
     );
 }
 ```
 
-## QueryClient 常用配置選項
+## useQuery：抓取資料的神器
 
-`QueryClient` 是 React Query 的核心，負責管理所有查詢和緩存。以下是常用的配置選項：
+這是我最常用的 hook：
 
-```tsx
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 60 * 1000, // 數據被視為過時前的時間（毫秒）
-            gcTime: 5 * 60 * 1000, // 未使用的數據被垃圾回收前的時間（毫秒）
-            retry: 3, // 失敗時重試次數
-            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 重試延遲
-            refetchOnWindowFocus: true, // 窗口獲得焦點時重新獲取
-            refetchOnMount: true, // 元件掛載時重新獲取
-            refetchOnReconnect: true, // 網絡重新連接時重新獲取
-            suspense: false, // 是否使用 React Suspense
-        },
-        mutations: {
-            retry: 0, // 變更操作默認不重試
-        },
-    },
-});
-```
-
-### staleTime vs gcTime：關鍵差異
-
-React Query 中兩個最重要的時間配置是 `staleTime` 和 `gcTime`，理解它們的差異對於優化應用性能至關重要：
-
-#### staleTime（過時時間）
-
-- **定義**：數據被視為"新鮮"的時間長度
-- **作用**：控制數據何時需要重新獲取
-- **默認值**：0（數據立即被視為過時）
-- **行為**：
-    - 當數據未過時時，不會在背景重新獲取
-    - 當元件重新掛載或窗口重新獲得焦點時，不會重新獲取未過時的數據
-
-#### gcTime（垃圾回收時間）
-
-- **定義**：非活動查詢結果在緩存中保留的時間長度
-- **作用**：控制未使用的查詢數據何時從緩存中移除
-- **默認值**：5分鐘（300000毫秒）
-- **行為**：
-    - 當查詢不再被任何元件使用時，計時開始
-    - 計時結束後，查詢數據從緩存中移除
-    - 之前稱為 `cacheTime`
-
-#### 實際應用示例
-
-```tsx
-// 頻繁變化的數據，短的過時時間
-const { data: stockPrices } = useQuery({
-    queryKey: ['stocks'],
-    queryFn: fetchStockPrices,
-    staleTime: 10 * 1000, // 10秒後過時
-    gcTime: 60 * 1000, // 1分鐘後垃圾回收
-});
-
-// 不常變化的數據，長的過時時間
-const { data: userProfile } = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => fetchUserProfile(userId),
-    staleTime: 24 * 60 * 60 * 1000, // 24小時後過時
-    gcTime: 7 * 24 * 60 * 60 * 1000, // 7天後垃圾回收
-});
-```
-
-#### 數據流程
-
-- 當新元件請求相同查詢時，TanStack Query 會：
-    - 先立即返回緩存中的數據（即使是過時的）
-    - 然後在背景中重新獲取新數據
-
-- 這種**過時但可用**的策略有幾個好處：
-    - 用戶立即看到內容（雖然可能稍微過時）
-    - 避免了頁面空白等待
-    - 當新數據獲取完成後，UI會自動更新
-
-## useQuery：基本數據獲取
-
-`useQuery` 是 React Query 最常用的 Hook，用於從 API 獲取數據：
-
-```tsx
+```typescript title="src/hooks/useUsers.ts"
 import { useQuery } from '@tanstack/react-query';
 
-// 定義獲取函數
-const fetchTodos = async () => {
-    const response = await fetch('https://api.example.com/todos');
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+// 抓取用戶資料的函數
+async function fetchUsers(): Promise<User[]> {
+    const response = await fetch('/api/users');
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Failed to fetch users');
     }
     return response.json();
-};
+}
 
-function TodoList() {
-    // 使用 useQuery 獲取數據
-    const {
-        data, // 獲取的數據
-        isLoading, // 是否正在加載
-        isError, // 是否發生錯誤
-        error, // 錯誤對象
-        refetch, // 手動重新獲取的函數
-        isFetching, // 是否正在獲取（包括背景重新獲取）
-    } = useQuery({
-        queryKey: ['todos'], // 唯一標識這個查詢的鍵
-        queryFn: fetchTodos, // 獲取數據的函數
-        staleTime: 60 * 1000, // 1分鐘後數據過時
+// 自訂 hook
+export function useUsers() {
+    return useQuery({
+        queryKey: ['users'], // 快取的鍵值
+        queryFn: fetchUsers,
+        staleTime: 5 * 60 * 1000, // 5 分鐘內不會重新抓取
     });
+}
+```
 
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error: {error.message}</div>;
+在組件中使用：
+
+```typescript title="src/components/UserList.tsx"
+import { useUsers } from '@/hooks/useUsers';
+
+export default function UserList() {
+    const { data, isLoading, error } = useUsers();
+
+    if (isLoading) return <div>載入中...</div>;
+    if (error) return <div>錯誤：{error.message}</div>;
 
     return (
-        <div>
-            <h1>Todo List</h1>
-            <button onClick={() => refetch()}>Refresh</button>
-            {isFetching && <div>Refreshing...</div>}
-            <ul>
-                {data.map((todo) => (
-                    <li key={todo.id}>{todo.title}</li>
-                ))}
-            </ul>
-        </div>
+        <ul>
+            {data?.map((user) => (
+                <li key={user.id}>
+                    {user.name} - {user.email}
+                </li>
+            ))}
+        </ul>
     );
 }
 ```
 
-### 帶參數的查詢
+就這麼簡單！不用自己管理 loading、error、data 狀態。
 
-```tsx
-function UserProfile({ userId }) {
-    const { data: user } = useQuery({
-        queryKey: ['user', userId], // 包含參數的查詢鍵
-        queryFn: () => fetchUser(userId),
-        enabled: !!userId, // 只有當 userId 存在時才執行查詢
-    });
+## 在 Next.js 中的伺服器端預取
 
-    // ...
-}
-```
+Next.js 的好處是可以在伺服器端先抓資料，用戶看到頁面時資料已經準備好了：
 
-### 依賴查詢
+```typescript title="src/app/users/page.tsx"
+import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import UserList from '@/components/UserList';
 
-```tsx
-function UserPosts({ userId }) {
-    const { data: user } = useQuery({
-        queryKey: ['user', userId],
-        queryFn: () => fetchUser(userId),
-    });
-
-    // 依賴於上一個查詢的結果
-    const { data: posts } = useQuery({
-        queryKey: ['posts', userId],
-        queryFn: () => fetchPosts(userId),
-        enabled: !!user, // 只有當用戶數據加載完成後才獲取帖子
-    });
-
-    // ...
-}
-```
-
-## 在 Next.js 中使用 React Query
-
-### App Router 中的預獲取
-
-在 App Router 中，我們可以在 Server Components 中預獲取數據：
-
-```tsx
-// app/todos/page.tsx
-import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
-import { getQueryClient } from '@/lib/getQueryClient';
-import TodoList from './TodoList';
-
-// 獲取函數
-async function fetchTodos() {
-    const res = await fetch('https://api.example.com/todos');
-    return res.json();
+async function fetchUsers() {
+    const response = await fetch('https://api.example.com/users');
+    return response.json();
 }
 
-export default async function TodosPage() {
-    const queryClient = getQueryClient();
+export default async function UsersPage() {
+    const queryClient = new QueryClient();
 
-    // 預獲取數據
+    // 在伺服器端預取資料
     await queryClient.prefetchQuery({
-        queryKey: ['todos'],
-        queryFn: fetchTodos,
+        queryKey: ['users'],
+        queryFn: fetchUsers,
     });
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <TodoList />
+            <div>
+                <h1>用戶列表</h1>
+                <UserList />
+            </div>
         </HydrationBoundary>
     );
 }
+```
 
-// app/todos/TodoList.tsx (Client Component)
-('use client');
+## useMutation：處理資料更新
 
-import { useQuery } from '@tanstack/react-query';
+用來處理新增、修改、刪除等操作：
 
-// 獲取函數（與服務器相同）
-const fetchTodos = async () => {
-    const res = await fetch('https://api.example.com/todos');
-    return res.json();
-};
+```typescript title="src/hooks/useCreateUser.ts"
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export default function TodoList() {
-    const { data } = useQuery({
-        queryKey: ['todos'],
-        queryFn: fetchTodos,
+interface CreateUserData {
+    name: string;
+    email: string;
+}
+
+async function createUser(userData: CreateUserData) {
+    const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
     });
 
-    // ...渲染數據
+    if (!response.ok) {
+        throw new Error('Failed to create user');
+    }
+
+    return response.json();
+}
+
+export function useCreateUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: createUser,
+        onSuccess: () => {
+            // 新增成功後，讓用戶列表重新抓取
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+        },
+        onError: (error) => {
+            console.error('建立用戶失敗:', error);
+        },
+    });
 }
 ```
 
-### 創建 getQueryClient 輔助函數
+在組件中使用：
 
-```tsx
-// lib/getQueryClient.ts
-import { QueryClient } from '@tanstack/react-query';
-import { cache } from 'react';
+```typescript title="src/components/CreateUserForm.tsx"
+import { useState } from 'react';
+import { useCreateUser } from '@/hooks/useCreateUser';
 
-// 使用 React 的 cache 函數確保每個請求只創建一個 QueryClient
-export const getQueryClient = cache(
-    () =>
-        new QueryClient({
-            defaultOptions: {
-                queries: {
-                    staleTime: 60 * 1000,
-                    gcTime: 5 * 60 * 1000,
-                },
-            },
-        })
-);
-```
+export default function CreateUserForm() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
 
-## 變更數據：useMutation
+    const createUserMutation = useCreateUser();
 
-`useMutation` 用於處理數據變更操作，如創建、更新或刪除數據：
-
-```tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-function AddTodoForm() {
-    const queryClient = useQueryClient();
-    const [title, setTitle] = useState('');
-
-    // 定義變更操作
-    const addTodoMutation = useMutation({
-        mutationFn: async (newTodo) => {
-            const response = await fetch('https://api.example.com/todos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newTodo),
-            });
-            return response.json();
-        },
-        // 變更成功後更新查詢緩存
-        onSuccess: (data) => {
-            // 使緩存失效，強制重新獲取
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
-
-            // 或者直接更新緩存
-            queryClient.setQueryData(['todos'], (oldData) => [...oldData, data]);
-
-            // 重置表單
-            setTitle('');
-        },
-    });
-
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        addTodoMutation.mutate({ title, completed: false });
+        createUserMutation.mutate({ name, email });
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Add a new todo" />
-            <button type="submit" disabled={addTodoMutation.isPending}>
-                {addTodoMutation.isPending ? 'Adding...' : 'Add Todo'}
+            <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="姓名"
+                required
+            />
+            <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+            />
+            <button
+                type="submit"
+                disabled={createUserMutation.isPending}
+            >
+                {createUserMutation.isPending ? '建立中...' : '建立用戶'}
             </button>
-            {addTodoMutation.isError && <div>Error: {addTodoMutation.error.message}</div>}
         </form>
     );
 }
 ```
 
-## 高級用法
+## staleTime vs gcTime：我一直搞混的概念
 
-### 無限查詢（分頁加載）
+這兩個參數我一開始總是搞不清楚：
 
-使用 `useInfiniteQuery` 實現"加載更多"功能：
+### staleTime（過期時間）
 
-```tsx
-import { useInfiniteQuery } from '@tanstack/react-query';
+資料被認為是「新鮮」的時間。在這段時間內，不會重新抓取資料。
 
-function InfiniteTodoList() {
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery({
-        queryKey: ['infiniteTodos'],
-        queryFn: async ({ pageParam = 1 }) => {
-            const res = await fetch(`https://api.example.com/todos?page=${pageParam}`);
-            return res.json();
-        },
-        getNextPageParam: (lastPage, allPages) => {
-            return lastPage.nextPage ?? undefined;
-        },
-    });
+### gcTime（垃圾回收時間，以前叫 cacheTime）
 
-    if (status === 'pending') return <div>Loading...</div>;
-    if (status === 'error') return <div>Error!</div>;
+快取資料會保存多久。超過這個時間，資料會被從記憶體中清除。
 
-    return (
-        <div>
-            {data.pages.map((page, i) => (
-                <React.Fragment key={i}>
-                    {page.todos.map((todo) => (
-                        <div key={todo.id}>{todo.title}</div>
-                    ))}
-                </React.Fragment>
-            ))}
-            <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
-                {isFetchingNextPage ? 'Loading more...' : hasNextPage ? 'Load More' : 'Nothing more to load'}
-            </button>
-        </div>
-    );
-}
-```
-
-### 樂觀更新
-
-在等待伺服器響應的同時立即更新 UI：
-
-```tsx
-function TodoItem({ todo }) {
-    const queryClient = useQueryClient();
-
-    const toggleMutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch(`https://api.example.com/todos/${todo.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ completed: !todo.completed }),
-            });
-            return response.json();
-        },
-        // 樂觀更新
-        onMutate: async (variables) => {
-            // 取消任何外部獲取
-            await queryClient.cancelQueries({ queryKey: ['todos'] });
-
-            // 保存之前的數據
-            const previousTodos = queryClient.getQueryData(['todos']);
-
-            // 樂觀地更新緩存
-            queryClient.setQueryData(['todos'], (old) =>
-                old.map((t) => (t.id === todo.id ? { ...t, completed: !t.completed } : t))
-            );
-
-            // 返回上下文對象
-            return { previousTodos };
-        },
-        // 如果變更失敗，使用保存的數據回滾
-        onError: (err, variables, context) => {
-            queryClient.setQueryData(['todos'], context.previousTodos);
-        },
-        // 變更完成後（無論成功或失敗）
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
-        },
-    });
-
-    return (
-        <div>
-            <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => toggleMutation.mutate()}
-                disabled={toggleMutation.isPending}
-            />
-            <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>{todo.title}</span>
-        </div>
-    );
-}
-```
-
-### 查詢取消
-
-React Query 支持取消正在進行的查詢：
-
-```tsx
-import { useQuery } from '@tanstack/react-query';
-
-function SearchResults({ query }) {
-    const { data, isLoading } = useQuery({
-        queryKey: ['search', query],
-        queryFn: async ({ signal }) => {
-            // 傳遞 AbortSignal 到 fetch
-            const response = await fetch(`https://api.example.com/search?q=${query}`, { signal });
-            return response.json();
-        },
-        enabled: !!query,
-    });
-
-    // ...
-}
-```
-
-## 實用技巧和最佳實踐
-
-### 1. 使用查詢鍵結構化數據
-
-```tsx
-// 不好的做法
-useQuery({ queryKey: ['todos-by-user-1'], ... })
-
-// 好的做法
-useQuery({ queryKey: ['todos', { userId: 1 }], ... })
-```
-
-### 2. 使用 select 轉換數據
-
-```tsx
-const { data: todoCount } = useQuery({
-    queryKey: ['todos'],
-    queryFn: fetchTodos,
-    select: (data) => data.length, // 只返回計數
+```typescript
+useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+    staleTime: 5 * 60 * 1000, // 5 分鐘內資料是新鮮的
+    gcTime: 30 * 60 * 1000, // 30 分鐘後清除快取
 });
 ```
 
-### 3. 使用 placeholderData 提供即時 UI 反饋
+我的建議：
 
-```tsx
-const { data } = useQuery({
-    queryKey: ['todo', id],
-    queryFn: () => fetchTodo(id),
-    placeholderData: () => {
-        // 從另一個查詢中獲取數據作為佔位符
-        const todos = queryClient.getQueryData(['todos']);
-        return todos?.find((todo) => todo.id === id);
+- **staleTime**：根據資料更新頻率設定（使用者資料可能設 5 分鐘）
+- **gcTime**：通常設定比 staleTime 長一點
+
+## 實戰技巧分享
+
+### 1. 條件性查詢
+
+有時候你需要在某些條件滿足時才抓取資料：
+
+```typescript
+function useUserProfile(userId?: number) {
+    return useQuery({
+        queryKey: ['user', userId],
+        queryFn: () => fetchUser(userId!),
+        enabled: !!userId, // 只有當 userId 存在時才執行
+    });
+}
+```
+
+### 2. 分頁查詢
+
+```typescript
+function useUsers(page: number = 1) {
+    return useQuery({
+        queryKey: ['users', page],
+        queryFn: () => fetchUsers(page),
+        keepPreviousData: true, // 切換頁面時保留前一頁資料
+    });
+}
+```
+
+### 3. 樂觀更新
+
+先更新 UI，API 失敗再回復：
+
+```typescript
+const updateUserMutation = useMutation({
+    mutationFn: updateUser,
+    onMutate: async (newUser) => {
+        // 取消進行中的查詢
+        await queryClient.cancelQueries({ queryKey: ['users'] });
+
+        // 先更新快取
+        const previousUsers = queryClient.getQueryData(['users']);
+        queryClient.setQueryData(['users'], (old: User[]) =>
+            old.map((user) => (user.id === newUser.id ? newUser : user))
+        );
+
+        return { previousUsers };
+    },
+    onError: (err, newUser, context) => {
+        // 失敗時回復
+        queryClient.setQueryData(['users'], context?.previousUsers);
+    },
+    onSettled: () => {
+        // 不管成功失敗都重新抓取
+        queryClient.invalidateQueries({ queryKey: ['users'] });
     },
 });
 ```
 
-### 4. 使用 keepPreviousData 在分頁查詢之間保持數據
+## 我踩過的坑
 
-```tsx
-const { data, isPreviousData } = useQuery({
-    queryKey: ['todos', page],
-    queryFn: () => fetchTodosByPage(page),
-    keepPreviousData: true, // 加載新頁面時保留舊數據
+### 1. queryKey 不一致
+
+我曾經在不同地方用不同的 queryKey，結果快取沒有共享。記住要保持一致！
+
+### 2. 忘記處理錯誤
+
+一開始我都專注在成功的情況，忘了處理 API 錯誤，用戶體驗很差。
+
+### 3. 過度使用 invalidateQueries
+
+每次更新都讓所有相關查詢失效，結果網路請求變很多。要精準一點。
+
+### 4. 在 Next.js 中的 hydration 問題
+
+伺服器端和客戶端的資料不一致會出現 hydration 錯誤，要用 HydrationBoundary 包裝。
+
+## 效能優化建議
+
+### 1. 適當設定 staleTime
+
+```typescript
+// 很少變動的資料
+const { data } = useQuery({
+    queryKey: ['config'],
+    queryFn: fetchConfig,
+    staleTime: 30 * 60 * 1000, // 30 分鐘
+});
+
+// 經常變動的資料
+const { data } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotifications,
+    staleTime: 30 * 1000, // 30 秒
 });
 ```
 
-### 5. 使用 setQueryDefaults 設置特定查詢的默認選項
+### 2. 使用 select 減少重新渲染
 
-```tsx
-// 在應用初始化時
-queryClient.setQueryDefaults(['todos'], {
-    staleTime: 5 * 60 * 1000, // 5分鐘
-    gcTime: 10 * 60 * 1000, // 10分鐘
+```typescript
+const { data: userNames } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+    select: (users) => users.map((user) => user.name), // 只關心名字
 });
 ```
 
-## 常見問題和解決方案
+### 3. 分割大查詢
 
-### 1. 數據不更新
-
-如果數據不更新，可能是 `staleTime` 設置過長。嘗試：
-
-```tsx
-// 減少 staleTime 或強制重新獲取
-const { data, refetch } = useQuery({
-    queryKey: ['todos'],
-    queryFn: fetchTodos,
-    staleTime: 0, // 立即過時
-});
-
-// 手動重新獲取
-<button onClick={() => refetch()}>Refresh</button>;
-```
-
-### 2. 緩存管理
-
-清除特定查詢或所有查詢：
-
-```tsx
-// 清除特定查詢
-queryClient.removeQueries({ queryKey: ['todos', { userId: 1 }] });
-
-// 使特定查詢失效（觸發重新獲取）
-queryClient.invalidateQueries({ queryKey: ['todos'] });
-
-// 重置所有查詢
-queryClient.resetQueries();
-```
-
-### 3. 類型安全的查詢
-
-使用 TypeScript 定義查詢類型：
-
-```tsx
-interface Todo {
-    id: number;
-    title: string;
-    completed: boolean;
-}
-
-const { data } = useQuery<Todo[], Error>({
-    queryKey: ['todos'],
-    queryFn: fetchTodos,
-});
-```
+不要一次抓太多資料，可以分成多個小查詢。
 
 ## 總結
 
-React Query 是一個強大的數據獲取和狀態管理庫，可以大大簡化 React 和 Next.js 應用中的數據獲取邏輯。通過正確配置 `staleTime` 和 `gcTime`，以及利用 `useQuery`、`useMutation` 和 `HydrationBoundary` 等 API，你可以構建高性能、響應式的應用，同時提供出色的用戶體驗。
+React Query 真的改變了我處理資料的方式。雖然一開始會覺得概念有點複雜，但一旦熟悉後就會發現它解決了很多痛點：
 
-關鍵要點：
+- 不用再手動管理 loading 狀態
+- 自動的快取和背景更新
+- 統一的錯誤處理
+- 更好的用戶體驗
 
-- **QueryClient** 是核心，負責管理所有查詢和緩存
-- **staleTime** 控制數據何時需要重新獲取
-- **gcTime** 控制未使用的數據何時從緩存中移除
-- **useQuery** 用於獲取數據
-- **useMutation** 用於變更數據
-- **HydrationBoundary** 和 **prefetchQuery** 用於服務器端渲染和數據預獲取
+特別推薦給那些厭倦了手動管理 API 狀態的開發者。一旦用了 React Query，真的很難回到以前的寫法！
 
-通過掌握這些概念和 API，你可以在 React 和 Next.js 應用中實現高效、可靠的數據獲取策略。
-
-## 參考來源
-
-- **[TanStack Query 官方文檔](https://tanstack.com/query/latest)**
-- **[React Query 與 Next.js 集成指南](https://tanstack.com/query/latest/docs/react/guides/ssr)**
-- **[React Query 數據轉換指南](https://tanstack.com/query/latest/docs/react/guides/queries)**
-- **[React Query 緩存管理](https://tanstack.com/query/latest/docs/react/guides/caching)**
+有任何問題歡迎討論，我也還在持續學習更多進階用法中！

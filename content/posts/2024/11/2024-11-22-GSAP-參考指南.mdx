@@ -2,43 +2,43 @@
 category: Code
 title: GSAP 參考指南
 date: 2024-11-22
-description: 這篇介紹了 Git Commit Message 的格式規範，包括標題、正文和尾注的結構，並提供了常見的提交類型和示例，幫助開發者撰寫清晰且有意義的提交消息。
+description: 做網頁動畫一直是我覺得最有成就感的事，CSS 動畫有限制，原生 JS 又太複雜。直到遇到 GSAP，才發現原來做動畫可以這麼簡單又強大。分享一下我這幾個月來的使用心得。
 tags: ['GSAP', 'Frontend']
 image: /blog/posts/2024/11/gsap.jpg
 slug: gasap-reference-guide
 ---
 
-## 什麼是 GSAP？
+## 為什麼我選擇 GSAP？
 
-GSAP（GreenSock Animation Platform）是一個強大的 JavaScript 動畫庫，能夠創建高效、流暢的動畫效果。它支持多種瀏覽器，並且可以與其他庫（如 React、Vue 等）無縫集成。
+做網頁的時候，最讓我興奮的就是各種動畫效果了。一開始用 CSS animation，但很快就發現限制太多；試過原生 JavaScript，但寫起來真的很痛苦。
 
-## 安裝 GSAP
+後來同事推薦我用 GSAP，我才知道什麼叫做「專業級動畫庫」。它不只效能好，語法也很直觀，重點是可以跟 React、Vue 完美配合。
 
-你可以通過 npm 或 CDN 來安裝 GSAP。
+現在我的專案幾乎都會用到 GSAP，從簡單的 hover 效果到複雜的頁面轉場，都難不倒它。
 
-### 使用 npm 安裝
+## 安裝很簡單
+
+### 用 npm 安裝
 
 ```bash
 npm install gsap
 ```
 
-### 使用 CDN
-
-在你的 HTML 文件中添加以下 `<script>` 標籤：
+### 想快速測試的話用 CDN
 
 ```html title="index.html"
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
 ```
 
-## 在 React 或 Next.js 中使用 GSAP
+我建議開發時用 npm，測試時用 CDN 比較快。
 
-### 基本用法
+## 在 React/Next.js 中使用
 
-在 React 或 Next.js 中使用 GSAP 時，通常會在 useEffect 中進行動畫初始化，以確保 DOM 元素已經渲染。
+剛開始用的時候踩了一些坑，分享一下我的經驗。
 
-### 創建簡單動畫
+### 一定要在 useEffect 裡初始化
 
-以下是一個簡單的 GSAP 動畫示例，將一個元素從左側移動到右側：
+這點很重要！因為 GSAP 需要操作 DOM 元素，所以一定要等元素渲染完成才能執行。
 
 ```javascript
 import { gsap } from 'gsap';
@@ -46,6 +46,7 @@ import React, { useEffect } from 'react';
 
 const Box = () => {
     useEffect(() => {
+        // 這個動畫會讓盒子從左邊滑到右邊
         gsap.to('#box', { x: 300, duration: 2 });
     }, []);
 
@@ -55,18 +56,18 @@ const Box = () => {
 export default Box;
 ```
 
-### 動畫參數
+### 常用的動畫參數
 
-GSAP 提供了多種參數來控制動畫效果：
+這些是我最常用的參數，基本上能解決 80% 的需求：
 
-- **duration**: 動畫持續時間（秒）。
-- **x**, **y**: 移動的距離。
-- **opacity**: 透明度。
-- **scale**: 縮放比例。
+- **duration**: 動畫時間（秒），我通常設 1-2 秒
+- **x**, **y**: 移動距離，負數就是往反方向
+- **opacity**: 透明度，做淡入淡出超好用
+- **scale**: 縮放，1 是原始大小
 
-### 連續動畫
+### 做連續動畫效果
 
-你可以使用 **stagger** 參數來創建連續動畫效果：
+這個功能我超愛用，可以讓多個元素依序動畫：
 
 ```javascript
 import { gsap } from 'gsap';
@@ -74,10 +75,11 @@ import React, { useEffect } from 'react';
 
 const Boxes = () => {
     useEffect(() => {
+        // 每個盒子會間隔 0.5 秒依序動畫
         gsap.to('.box', {
             x: 300,
             duration: 1,
-            stagger: 0.5, // 每個元素之間的延遲
+            stagger: 0.5,
         });
     }, []);
 
@@ -96,11 +98,9 @@ const Boxes = () => {
 export default Boxes;
 ```
 
-## GSAP 的進階用法
+## Timeline - 管理複雜動畫的救星
 
-### Timeline
-
-GSAP 的 **Timeline** 功能可以讓你更方便地管理多個動畫：
+剛開始我都是一個個動畫分開寫，後來動畫一多就亂套了。Timeline 真的解決了我的煩惱，可以把一系列動畫串起來管理。
 
 ```javascript
 import { gsap } from 'gsap';
@@ -109,9 +109,9 @@ import React, { useEffect } from 'react';
 const TimelineExample = () => {
     useEffect(() => {
         const tl = gsap.timeline();
-        tl.to('#box', { x: 300, duration: 1 })
-            .to('#box', { rotation: 360, duration: 1 })
-            .to('#box', { scale: 2, duration: 1 });
+        tl.to('#box', { x: 300, duration: 1 }) // 先往右移
+            .to('#box', { rotation: 360, duration: 1 }) // 再旋轉
+            .to('#box', { scale: 2, duration: 1 }); // 最後放大
     }, []);
 
     return <div id="box" style={{ width: '100px', height: '100px', backgroundColor: 'red' }} />;
@@ -120,9 +120,9 @@ const TimelineExample = () => {
 export default TimelineExample;
 ```
 
-### 事件回調
+## 事件回調超實用
 
-GSAP 也支持事件回調，讓你在動畫開始、結束或中斷時執行特定的函數：
+有時候你需要在動畫結束後執行一些邏輯，這時候回調函數就派上用場了。我常用來觸發下一個動畫或更新狀態。
 
 ```javascript
 import { gsap } from 'gsap';
@@ -134,7 +134,8 @@ const BoxWithCallback = () => {
             x: 300,
             duration: 2,
             onComplete: () => {
-                console.log('Animation completed!');
+                console.log('動畫完成！');
+                // 這裡可以觸發其他邏輯
             },
         });
     }, []);
@@ -145,23 +146,26 @@ const BoxWithCallback = () => {
 export default BoxWithCallback;
 ```
 
-## 常見錯誤
+## 我踩過的坑
 
-- **未正確引入 GSAP**：確保在使用 GSAP 之前已經正確引入庫。
-- **選擇器錯誤**：檢查選擇器是否正確，確保動畫目標存在於 DOM 中。
-- **動畫持續時間過短**：如果動畫過快，可能會導致效果不明顯，適當調整 **duration**。
+### DOM 元素還沒準備好
 
-## 最佳實踐
+最常見的錯誤！記得要在 useEffect 裡執行，確保元素已經渲染。
 
-- **使用 Timeline**：對於複雜的動畫，使用 **Timeline** 來管理動畫順序。
-- **避免重複動畫**：在開始新動畫之前，確保停止或清除舊動畫，以避免性能問題。
-- **測試不同瀏覽器**：GSAP 支持多種瀏覽器，但在不同環境中測試動畫效果是個好習慣。
+### ID 選擇器找不到元素
 
-## 實用範例
+檢查一下 ID 是否正確，或者元素是否真的存在於頁面上。
 
-### 基礎動畫組合
+### 動畫太快看不清楚
+
+duration 設太小會看不出效果，我建議至少 0.5 秒以上。
+
+## 實戰技巧分享
+
+### 基本動畫組合
 
 ```javascript
+// 我最常用的組合：移動 + 淡入 + 縮放
 gsap.to('.element', {
     duration: 1,
     x: 100,
@@ -170,9 +174,10 @@ gsap.to('.element', {
 });
 ```
 
-### 序列動畫
+### 依序出現效果
 
 ```javascript
+// 讓元素像瀑布一樣依序出現
 gsap.to(elements, {
     duration: 1,
     y: 100,
@@ -184,30 +189,30 @@ gsap.to(elements, {
 });
 ```
 
-### 複雜動畫組合
+### 彈跳效果（我的最愛）
 
 ```javascript
+// 這個彈跳效果超棒，用戶都很喜歡
 gsap.to(element, {
     duration: 2,
     x: 200,
     rotation: 360,
     scale: 1.5,
-    ease: 'elastic.out(1, 0.3)',
+    ease: 'elastic.out(1, 0.3)', // 這個 ease 是關鍵
     yoyo: true,
     repeat: -1,
     repeatDelay: 1,
-    onRepeat: () => console.log('重複播放'),
+    onRepeat: () => console.log('又彈跳了一次！'),
 });
 ```
 
-### 說明
+## 我的建議
 
-1. **基本動畫屬性**：列出了常用的動畫屬性，如位移、旋轉、縮放、透明度等。
-2. **時間控制**：介紹了控制動畫時間的屬性，如持續時間、延遲、重複次數等。
-3. **緩動函數 (Easing)**：列出了常用的緩動效果。
-4. **回調函數**：介紹了動畫過程中的回調函數，如開始、更新、完成、重複等。
-5. **隨機值與函數**：介紹了如何使用隨機值和函數來設置動畫屬性。
-6. **變形相關**：介紹了變形相關的屬性，如變形原點、傾斜等。
-7. **特殊控制**：介紹了特殊控制屬性，如暫停、立即渲染、覆蓋規則、序列動畫等。
-8. **SVG 特定屬性**：列出了 SVG 動畫中特有的屬性。
-9. **TextPlugin 屬性**：介紹了 [TextPlugin](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2FUsers%2Fgarylin%2FDesktop%2FGitHub%2Fblog-starter-app%2Fdocs%2Fgsap-reference.md%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A8%7D%7D%5D%2C%221ef9ccc6-5afa-4d07-9915-e1aa8a7fba04%22%5D 'Go to definition') 的使用方法。
+1. **從簡單開始**：先掌握基本的移動、縮放、透明度
+2. **多用 Timeline**：複雜動畫一定要用，不然會很混亂
+3. **注意效能**：手機上測試一下，確保不會卡頓
+4. **適度就好**：動畫是加分的，不要讓它變成干擾
+
+用了 GSAP 這麼久，我覺得它真的是前端開發者必須掌握的工具之一。不管是提升用戶體驗還是展示技術實力，都非常有用。
+
+有問題的話歡迎交流，我也還在持續學習中！
