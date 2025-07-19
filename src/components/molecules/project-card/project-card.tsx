@@ -7,12 +7,18 @@ import { cn } from '@/utils/shadcn';
 
 interface ProjectCardProps {
     className?: string;
+    maxVisible?: number;
     project: (typeof PROJECT_LIST)[number];
 }
 
-const ProjectCard = ({ className, project }: ProjectCardProps) => {
+const ProjectCard = ({ className, maxVisible, project }: ProjectCardProps) => {
+    // 限制顯示的標籤數量
+    const visibleTags = project.tags.slice(0, maxVisible ?? project.tags.length);
+    // 計算剩餘的標籤數量
+    const remainingCount = project.tags.length - visibleTags.length;
+
     return (
-        <a href={project.url} className={cn('group', className)}>
+        <a href={project.url} className={cn('group', className)} target="_blank" rel="noreferrer noopener">
             <Card className="flex h-full flex-col gap-0 overflow-hidden p-0">
                 <AspectRatio ratio={16 / 9} className="overflow-hidden">
                     <NextImage
@@ -24,12 +30,15 @@ const ProjectCard = ({ className, project }: ProjectCardProps) => {
                 </AspectRatio>
                 <CardContent className="flex flex-1 flex-col space-y-6 p-6">
                     <CardTitle className="group-hover:text-primary">{project.name}</CardTitle>
-                    <div className="flex flex-wrap gap-2">
-                        {project.tags.map((tag) => (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {visibleTags.map((tag) => (
                             <Badge key={tag} className="px-2 py-1" variant="secondary">
                                 {tag}
                             </Badge>
                         ))}
+                        {remainingCount > 0 && (
+                            <span className="text-muted-foreground text-xs">+{remainingCount} more</span>
+                        )}
                     </div>
                 </CardContent>
             </Card>
