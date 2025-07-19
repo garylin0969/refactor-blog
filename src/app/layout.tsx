@@ -40,7 +40,7 @@ export default function RootLayout({
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <div className="flex min-h-screen flex-col">
                         <Header />
-                        <main className="container mx-auto my-8 flex-1 px-4">{children}</main>
+                        <main className="container mx-auto my-8 flex flex-1 flex-col px-4">{children}</main>
                         <Footer />
                     </div>
                 </ThemeProvider>
