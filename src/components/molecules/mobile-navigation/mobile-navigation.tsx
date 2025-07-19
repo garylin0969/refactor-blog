@@ -18,7 +18,7 @@ const MobileNavigation = () => {
                         <SheetTitle>
                             <Logo imageLoading="lazy" />
                         </SheetTitle>
-                        <SheetDescription>Navigation</SheetDescription>
+                        <SheetDescription className="sr-only">Mobile Navigation</SheetDescription>
                     </SheetHeader>
                     <Navigation
                         menuClassName="flex min-w-full flex-none flex-col items-start justify-start gap-y-2"
