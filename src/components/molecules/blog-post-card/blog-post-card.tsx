@@ -10,7 +10,7 @@ interface BlogPostCardProps {
     post: Post;
 }
 
-export const BlogPostCard = ({ className, post }: BlogPostCardProps) => {
+const BlogPostCard = ({ className, post }: BlogPostCardProps) => {
     const link = `/blog/posts/${post.slug}`;
 
     return (
@@ -51,3 +51,5 @@ export const BlogPostCard = ({ className, post }: BlogPostCardProps) => {
         </Link>
     );
 };
+
+export default BlogPostCard;
