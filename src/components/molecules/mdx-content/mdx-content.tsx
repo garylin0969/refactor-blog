@@ -1,27 +1,31 @@
 import * as runtime from 'react/jsx-runtime';
 import React, { ComponentType } from 'react';
-import { CopyButton } from '@/components/atoms/copy-button';
+import CodeBlock from '@/components/molecules/code-block';
 
+// 提取程式碼片段的屬性
+const extractCodeBlockProps = (children: any) => {
+    const hasTitle = Array.isArray(children); // 判斷是否有標題
+    const title = hasTitle ? (children?.[0]?.props?.children ?? '') : ''; // 如果有標題，則取標題
+    // 如果有標題，則取標題的data-language屬性，否則取程式碼片段的data-language屬性
+    const language = hasTitle
+        ? (children?.[0]?.props?.['data-language'] ?? '')
+        : (children?.props?.['data-language'] ?? '');
+    // 如果有標題，則取標題的rawcontent屬性，否則取程式碼片段的rawcontent屬性
+    const copyContent = hasTitle ? (children?.[1]?.props?.rawcontent ?? '') : (children?.props?.rawcontent ?? '');
+
+    // 返回標題、語言和複製內容
+    return { title, language, copyContent };
+};
+
+// 客製化blog的元件
 const sharedComponents: Record<string, ComponentType<any>> = {
     figure: ({ children, ...props }) => {
-        const hasTitle = Array.isArray(children);
-        const title = hasTitle ? (children?.[0]?.props?.children ?? '') : '';
-        const language = hasTitle
-            ? (children?.[0]?.props?.['data-language'] ?? '')
-            : (children?.props?.['data-language'] ?? '');
-        const copyContent = hasTitle ? (children?.[1]?.props?.rawcontent ?? '') : (children?.props?.rawcontent ?? '');
+        const { title, language, copyContent } = extractCodeBlockProps(children);
 
         return (
-            <div className="overflow-hidden rounded-xs border border-[#ffffff4d] bg-[#282c34]">
-                <figcaption className="flex h-[45px] items-center justify-between border-b border-[#ffffff4d] px-3 py-1">
-                    <span className="text-sm text-white">{title}</span>
-                    <div className="flex items-center gap-x-2">
-                        <span className="text-sm text-white">{language}</span>
-                        <CopyButton content={copyContent} />
-                    </div>
-                </figcaption>
-                <figure {...props}>{children}</figure>
-            </div>
+            <CodeBlock title={title} language={language} copyContent={copyContent} {...props}>
+                {children}
+            </CodeBlock>
         );
     },
 
