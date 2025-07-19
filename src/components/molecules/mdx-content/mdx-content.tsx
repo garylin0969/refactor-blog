@@ -1,6 +1,7 @@
 import * as runtime from 'react/jsx-runtime';
 import React, { ComponentType } from 'react';
 import CodeBlock from '@/components/molecules/code-block';
+import { Badge } from '@/components/ui/badge';
 
 // 提取程式碼片段的屬性
 const extractCodeBlockProps = (children: any) => {
@@ -30,6 +31,20 @@ const sharedComponents: Record<string, ComponentType<any>> = {
     },
 
     figcaption: () => null,
+
+    code: ({ children, ...props }) => {
+        const isInline = typeof children === 'string';
+
+        if (isInline) {
+            return (
+                <Badge className="rounded-md px-2 py-1" variant="secondary" {...props}>
+                    {children}
+                </Badge>
+            );
+        }
+
+        return <code {...props}>{children}</code>;
+    },
 };
 
 // 將Velite生成的MDX代碼解析為React元件函數
