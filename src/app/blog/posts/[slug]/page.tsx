@@ -44,7 +44,7 @@ const PostPage = async ({ params }: PageProps) => {
     }
 
     return (
-        <div className="mx-auto max-w-4xl px-4">
+        <div className="mx-auto max-w-4xl">
             <article className="max-w-none">
                 <header className="mb-4 space-y-3 border-b pb-4">
                     <h1 className="text-[42px] font-bold">{post?.title}</h1>

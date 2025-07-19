@@ -46,7 +46,7 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     const getPageUrl = (pageNumber: number) => `/blog/${category}/${pageNumber}`;
 
     return (
-        <div className="mx-auto max-w-5xl px-4">
+        <div className="mx-auto max-w-5xl">
             {/* 文章列表 */}
             <div>
                 {posts.map((post) => (
