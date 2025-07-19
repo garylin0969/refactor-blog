@@ -58,6 +58,10 @@ export const getAllTags = (options: Options = { sort: 'desc', draft: false }) =>
     return [...new Set(filteredPosts.flatMap((post) => post?.tags).filter(Boolean))];
 };
 
+export const getLatestPosts = (limit: number = 5) => {
+    return sortPosts(posts).slice(0, limit);
+};
+
 // 檢查分類是否存在
 export const isCategoryExists = (category: string): boolean => {
     if (category === 'all') {
