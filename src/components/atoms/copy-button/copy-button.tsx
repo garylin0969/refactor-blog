@@ -36,12 +36,12 @@ const CopyButton = ({ className, content }: CopyButtonProps) => {
         >
             {copied ? (
                 <>
-                    <Check className="text-white" size={14} />
+                    <Check size={14} />
                     <span className="sr-only">copied</span>
                 </>
             ) : (
                 <>
-                    <Copy className="text-white" size={14} />
+                    <Copy size={14} />
                     <span className="sr-only">copy</span>
                 </>
             )}
