@@ -181,7 +181,7 @@ code > [data-line]::before {
     width: 1rem;
     margin-right: 2rem;
     text-align: right;
-    color: rgba(115, 138, 148, 0.4);
+    color: #a1a1a1;
 }
 
 code[data-line-numbers-max-digits='1'] > [data-line]::before {
