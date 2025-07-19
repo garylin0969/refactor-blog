@@ -3,7 +3,7 @@ export const PROJECT_LIST = [
         id: 'hot-now',
         image: '/projects/hot-now.jpg',
         url: 'https://hotnow.garylin.dev/',
-        name: 'Hot Now',
+        name: 'Hot Now｜熱門話題一把抓',
         tags: [
             '2025',
             'Next.js',
