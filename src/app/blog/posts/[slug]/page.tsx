@@ -28,9 +28,39 @@ export async function generateMetadata({ params }: PageProps) {
         };
     }
 
+    // 決定要使用的圖片：post有image就用post的image，沒有就用網站icon
+    const ogImage = post.image
+        ? {
+              url: post.image,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+          }
+        : {
+              url: '/favicons/android-chrome-512x512.png',
+              width: 512,
+              height: 512,
+              alt: 'GaryLin Dev',
+          };
+
     return {
-        title: post?.title,
-        description: post?.description,
+        title: post.title,
+        description: post.description || post.title,
+        openGraph: {
+            title: `${post.title} | GaryLin Dev`,
+            description: post.description || post.title,
+            type: 'article',
+            publishedTime: post.date,
+            authors: ['Gary Lin'],
+            tags: post.tags,
+            images: [ogImage],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${post.title} | GaryLin Dev`,
+            description: post.description || post.title,
+            images: [ogImage],
+        },
     };
 }
 

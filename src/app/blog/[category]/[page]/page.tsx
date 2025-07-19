@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BlogPostCard from '@/components/molecules/blog-post-card';
 import { PaginationControls } from '@/components/molecules/pagination-controls';
@@ -9,6 +10,30 @@ interface BlogPageProps {
         category: string;
         page: string;
     }>;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: 'Blog',
+        description: '瀏覽 Gary Lin 的文章，涵蓋前端開發、React.js、Next.js 等主題',
+        openGraph: {
+            title: 'Blog | GaryLin Dev',
+            description: '瀏覽 Gary Lin 的文章，涵蓋前端開發、React.js、Next.js 等主題',
+            images: [
+                {
+                    url: '/favicons/android-chrome-512x512.png',
+                    width: 512,
+                    height: 512,
+                    alt: 'GaryLin Dev',
+                },
+            ],
+        },
+        twitter: {
+            title: 'Blog | GaryLin Dev',
+            description: '瀏覽 Gary Lin 的文章，涵蓋前端開發、React.js、Next.js 等主題',
+            images: ['/favicons/android-chrome-512x512.png'],
+        },
+    };
 }
 
 const BlogPage = async ({ params }: BlogPageProps) => {

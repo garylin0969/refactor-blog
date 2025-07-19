@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import SectionTitle from '@/components/atoms/section-title';
 import AuthorCard from '@/components/molecules/author-card';
 import GithubStatsCard from '@/components/molecules/github-stats-card/github-stats-card';
@@ -9,6 +10,28 @@ import { DEFAULT_TOP_LANGS_CONFIG } from '@/constants/github-stats';
 import { ABOUT_INTRO_LIST } from '@/constants/intro';
 import { PROJECT_LIST } from '@/constants/project';
 import { SKILL_LIST } from '@/constants/skill';
+
+export const metadata: Metadata = {
+    title: 'About',
+    description: '了解更多關於 Gary Lin 的背景、工作經驗、技能和專案',
+    openGraph: {
+        title: 'About | GaryLin Dev',
+        description: '了解更多關於 Gary Lin 的背景、工作經驗、技能和專案',
+        images: [
+            {
+                url: '/favicons/android-chrome-512x512.png',
+                width: 512,
+                height: 512,
+                alt: 'GaryLin Dev',
+            },
+        ],
+    },
+    twitter: {
+        title: 'About | GaryLin Dev',
+        description: '了解更多關於 Gary Lin 的背景、工作經驗、技能和專案',
+        images: ['/favicons/android-chrome-512x512.png'],
+    },
+};
 
 const AboutPage = () => {
     return (
