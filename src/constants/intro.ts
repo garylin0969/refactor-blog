@@ -1,6 +1,6 @@
 export const HOME_INTRO_LIST = [
     "Hi, I'm Gary Lin",
-    'A Frontend Developer passionate about JavaScript, TypeScript, React, Next and Tailwind CSS.',
+    'A Frontend Developer passionate about JavaScript, TypeScript, React.js, Next.js and Tailwind CSS.',
 ];
 
 export const ABOUT_INTRO_LIST = [
