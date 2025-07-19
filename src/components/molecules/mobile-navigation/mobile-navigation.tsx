@@ -3,7 +3,7 @@ import Logo from '@/components/atoms/logo';
 import ThemeToggle from '@/components/atoms/theme-toggle';
 import Navigation from '@/components/molecules/navigation';
 import SocialLinks from '@/components/molecules/social-links';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const MobileNavigation = () => {
     return (
@@ -18,6 +18,7 @@ const MobileNavigation = () => {
                         <SheetTitle>
                             <Logo imageLoading="lazy" />
                         </SheetTitle>
+                        <SheetDescription>Navigation</SheetDescription>
                     </SheetHeader>
                     <Navigation
                         menuClassName="flex min-w-full flex-none flex-col items-start justify-start gap-y-2"
