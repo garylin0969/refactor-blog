@@ -48,9 +48,9 @@ const BlogPage = async ({ params }: BlogPageProps) => {
     return (
         <div className="mx-auto max-w-5xl px-4">
             {/* 文章列表 */}
-            <div className="divide-border divide-y">
+            <div>
                 {posts.map((post) => (
-                    <BlogPostCard key={post?.slug} post={post} />
+                    <BlogPostCard key={post?.slug} className="border-b" post={post} />
                 ))}
             </div>
 

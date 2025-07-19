@@ -3,17 +3,19 @@ import Link from 'next/link';
 import NextImage from '@/components/atoms/next-image';
 import { PostMeta } from '@/components/atoms/post-meta';
 import { TagList } from '@/components/atoms/tag-list';
+import { cn } from '@/utils/shadcn';
 
 interface BlogPostCardProps {
+    className?: string;
     post: Post;
 }
 
-export const BlogPostCard = ({ post }: BlogPostCardProps) => {
+export const BlogPostCard = ({ className, post }: BlogPostCardProps) => {
     const link = `/blog/posts/${post.slug}`;
 
     return (
         <Link href={link} className="group">
-            <article className="p-4">
+            <article className={cn('p-4', className)}>
                 <div className="flex items-center gap-x-8">
                     {/* 內容區域 */}
                     <div className="flex-1">
