@@ -1,41 +1,48 @@
 'use client';
 
 import { Copy, Check } from 'lucide-react';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/utils/shadcn';
 
 interface CopyButtonProps {
-    code: string;
     className?: string;
+    content?: string;
 }
 
-const CopyButton: React.FC<CopyButtonProps> = ({ code, className = '' }) => {
+const CopyButton = ({ className, content }: CopyButtonProps) => {
     const [copied, setCopied] = useState(false);
+    let timeout: NodeJS.Timeout;
 
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(code);
+            await navigator.clipboard.writeText(content ?? '');
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+            timeout = setTimeout(() => setCopied(false), 1500);
         } catch (error) {
-            console.error('複製失敗:', error);
+            console.error('copy failed:', error);
         }
     };
 
+    useEffect(() => {
+        return () => clearTimeout(timeout);
+    }, []);
+
     return (
         <button
+            type="button"
+            className={cn('flex items-center justify-center p-1.5', className)}
+            title={copied ? 'copied' : 'copy'}
             onClick={handleCopy}
-            className={`bg-background/80 hover:bg-background absolute top-2 right-2 flex items-center gap-1 rounded p-1.5 text-xs opacity-0 transition-opacity group-hover:opacity-100 ${className}`}
-            title={copied ? '已複製！' : '複製代碼'}
         >
             {copied ? (
                 <>
-                    <Check size={14} className="text-green-500" />
-                    <span className="text-green-500">已複製</span>
+                    <Check className="text-white" size={14} />
+                    <span className="sr-only">copied</span>
                 </>
             ) : (
                 <>
-                    <Copy size={14} />
-                    <span>複製</span>
+                    <Copy className="text-white" size={14} />
+                    <span className="sr-only">copy</span>
                 </>
             )}
         </button>
