@@ -11,7 +11,7 @@ const BlogCategoriesCard = () => {
             <CardHeader>
                 <CardTitle>Categories</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-wrap gap-2">
                 {categories?.map((category) => (
                     <Link key={category?.category} href={`/blog/${category?.category}/1`}>
                         <Badge variant="outline" className="hover:text-primary px-2 py-1">
