@@ -6,6 +6,7 @@ import ProjectCard from '@/components/molecules/project-card';
 import SkillCard from '@/components/molecules/skill-card';
 import ExperienceTimeline from '@/components/organisms/experience-timeline';
 import { DEFAULT_TOP_LANGS_CONFIG } from '@/constants/github-stats';
+import { ABOUT_INTRO_LIST } from '@/constants/intro';
 import { PROJECT_LIST } from '@/constants/project';
 import { SKILL_LIST } from '@/constants/skills';
 
@@ -28,7 +29,7 @@ const AboutPage = () => {
                     />
                 </div>
                 {/* 簡短介紹卡片 */}
-                <IntroCard className="mx-auto max-w-3xl" />
+                <IntroCard className="mx-auto max-w-3xl" list={ABOUT_INTRO_LIST} />
             </section>
             <section className="space-y-4 md:space-y-8">
                 <SectionTitle className="text-center">Experience</SectionTitle>
