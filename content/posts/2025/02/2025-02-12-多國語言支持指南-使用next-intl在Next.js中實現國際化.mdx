@@ -1,0 +1,252 @@
+---
+category: Code
+title: 多國語言支持指南 - 使用 next-intl 在 Next.js 中實現國際化
+date: 2025-02-12
+description: 本文介紹如何在 Next.js 應用中使用 next-intl 來實現多國語言支持，涵蓋安裝、配置及基本使用方法，讓初學者也能輕鬆上手。
+tags: ['Next.js', 'Internationalization', 'i18n', 'next-intl', 'Frontend']
+image: /blog/posts/2025/02/next-intl.png
+slug: nextjs-internationalization-guide-next-intl
+---
+
+## 什麼是 next-intl？
+
+**next-intl** 是一個專為 Next.js 設計的國際化（i18n）解決方案，它整合了 Next.js 的 App Router，讓開發者能夠輕鬆地為应用添加多語言支持。透過 **next-intl**，可以使用動態路由或子域名路由來管理不同語言的內容，並提供豐富的本地化功能，如翻譯管理、日期和時間格式化等。
+
+## 為什麼選擇 next-intl？
+
+- **簡單易用**：與 Next.js 無縫集成，設定與使用都非常直觀。
+- **高效性能**：支持靜態渲染和服務器端渲染，確保應用性能。
+- **靈活配置**：支持多種路由策略，包括前綴路由和域名路由。
+- **豐富功能**：內建翻譯、日期時間格式化、數字格式化等多種本地化功能。
+
+## 如何在 Next.js 中設置 next-intl
+
+以下是使用 **next-intl** 在 Next.js 中實現國際化的步驟：
+
+### 1. 安裝 next-intl
+
+首先，確保您已經有一個使用 App Router 的 Next.js 應用。然後，運行以下命令來安裝 **next-intl**：
+
+```bash
+npm install next-intl
+```
+
+### 2. 配置文件結構
+
+按照 **next-intl** 的推薦，創建以下文件結構：
+
+```plaintext
+├── messages
+│   ├── en.json
+│   └── zh-TW.json
+├── next.config.mjs
+└── src
+    ├── i18n
+    │   ├── routing.ts
+    │   └── request.ts
+    ├── middleware.ts
+    └── app
+        └── [locale]
+            ├── layout.tsx
+            └── page.tsx
+```
+
+### 3. 創建翻譯文件
+
+在 **messages** 資料夾中，為每種語言創建對應的 JSON 文件。例如，**en.json** 和 **zh-TW.json**：
+
+```json title="messages/en.json"
+{
+    "HomePage": {
+        "title": "Hello World!",
+        "about": "Go to the about page"
+    }
+}
+```
+
+```json title="messages/zh-TW.json"
+{
+    "HomePage": {
+        "title": "你好，世界！",
+        "about": "前往關於頁面"
+    }
+}
+```
+
+### 4. 配置 **next.config.mjs**
+
+設置 **next-intl** 插件以提供請求特定的 i18n 配置：
+
+```typescript title="src/app/layout.tsx"
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // 其他 Next.js 配置
+};
+
+export default withNextIntl(nextConfig);
+```
+
+### 5. 配置路由
+
+在 **src/i18n/routing.ts** 中定義支持的語言和默認語言：
+
+```typescript title="src/i18n/routing.ts"
+import { createNavigation } from 'next-intl/navigation';
+import { defineRouting } from 'next-intl/routing';
+
+export const routing = defineRouting({
+    locales: ['en', 'zh-TW'],
+    defaultLocale: 'en',
+});
+
+export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing);
+```
+
+### 6. 設置中間件
+
+在 **src/middleware.ts** 中設置中間件以處理語言協商和路由重寫：
+
+```typescript title="src/middleware.ts"
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
+
+export default createMiddleware(routing);
+
+export const config = {
+    matcher: ['/((?!api|_next/static|favicon.ico).*)'],
+};
+```
+
+### 7. 配置請求
+
+在 **src/i18n/request.ts** 中設置請求配置，以便在服務器組件中使用本地化訊息：
+
+```typescript title="src/i18n/request.ts"
+import { getRequestConfig } from 'next-intl/server';
+import { routing } from './routing';
+
+export default getRequestConfig(async ({ requestLocale }) => {
+    let locale = await requestLocale;
+
+    if (!locale || !routing.locales.includes(locale as any)) {
+        locale = routing.defaultLocale;
+    }
+
+    return {
+        locale,
+        messages: (await import(`../../messages/${locale}.json`)).default,
+    };
+});
+```
+
+### 8. 配置布局
+
+在 **src/app/[locale]/layout.tsx** 中配置 **NextIntlClientProvider** 以提供翻譯訊息給客戶端組件：
+
+```typescript title="src/app/[locale]/layout.tsx"
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
+
+export default async function LocaleLayout({
+  children,
+  params: { locale }
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 9. 配置頁面
+
+在 **src/app/[locale]/page.tsx** 中使用 **useTranslations** 來顯示翻譯內容：
+
+```typescript title="src/app/[locale]/page.tsx"
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
+
+export default function HomePage() {
+  const t = useTranslations('HomePage');
+  return (
+    <div>
+      <h1>{t('title')}</h1>
+      <Link href="/about">{t('about')}</Link>
+    </div>
+  );
+}
+```
+
+### 10. 設置靜態參數
+
+為了支持靜態渲染，添加 **generateStaticParams** 函數：
+
+```typescript title="src/app/[locale]/layout.tsx"
+import { routing } from '@/i18n/routing';
+import { setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({ children, params: { locale } }) {
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 11. 更新 metadata
+
+確保每個頁面的 metadata 支持多語言：
+
+```typescript title="src/app/[locale]/page.tsx"
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({ params: { locale } }) {
+    const t = await getTranslations({ locale, namespace: 'Metadata' });
+
+    return {
+        title: t('title'),
+    };
+}
+```
+
+## 參考來源
+
+- **[next-intl 官方文檔](https://next-intl.dev/docs/getting-started/app-router/with-i18n-routing)**

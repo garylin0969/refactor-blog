@@ -1,0 +1,338 @@
+---
+category: Code
+title: Next.js 專案使用 GitLab CI/CD 到 GCP (GKE) 教學
+date: 2025-02-21
+description: 本文將詳細介紹如何將 Next.js 專案透過 GitLab CI/CD 自動化部署到 Google Kubernetes Engine (GKE)，包含 Docker 容器化、GitLab Pipeline 設定、GCP 服務配置等完整流程。
+tags: ['Next.js', 'GitLab', 'CI/CD', 'GCP', 'Docker', 'Kubernetes', 'DevOps']
+image: /blog/posts/2025/02/gitlab-cicd.jpg
+slug: nextjs-gitlab-cicd-gcp-gke-deployment
+---
+
+## 前言
+
+在現代網頁開發中，自動化部署（CI/CD）已經成為標準實踐。本文將帶領您一步步將 Next.js 專案透過 GitLab CI/CD 部署到 Google Kubernetes Engine (GKE)，適合完全沒接觸過的新手跟著實作。
+
+## 環境準備
+
+在開始之前，請確保您已經準備好以下項目：
+
+1. **開發環境**
+    - Node.js (建議 18.x 以上)
+    - Git
+    - Docker Desktop
+    - Google Cloud SDK
+
+2. **帳號設定**
+    - GitLab 帳號（需要有容器倉庫權限）
+    - Google Cloud Platform 帳號
+
+## 步驟一：Next.js 專案準備
+
+首先，確保您的 Next.js 專案能夠正常運作：
+
+```bash
+# 建立新的 Next.js 專案
+pnpm create next-app --typescript
+cd next-app
+
+# 安裝必要依賴
+pnpm install
+
+# 測試運行
+pnpm dev
+```
+
+## 步驟二：Docker 容器化
+
+### 1. 建立 Dockerfile
+
+在專案根目錄創建 **Dockerfile**：
+
+```dockerfile title="Dockerfile"
+# 建置階段
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN pnpm install
+COPY . .
+RUN pnpm build
+
+# 執行階段
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]
+```
+
+### 2. 更新 next.config.ts
+
+```typescript title="next.config.ts"
+const nextConfig: NextConfig = {
+    output: 'standalone',
+    // 其他配置...
+};
+
+module.exports = nextConfig;
+```
+
+## 步驟三：設定 GitLab CI/CD
+
+### 1. 設定 GitLab Container Registry
+
+1. 確認專案的 Container Registry 功能已啟用：
+    - 進入專案設定 -> Packages & Registries -> Container Registry
+    - 確認狀態為啟用
+
+2. 取得 Container Registry 路徑(兩者其一)：
+    - registry.gitlab.com/username/project-name
+    - registry.gitlab.com/group/project-name
+
+### 2. 建立 .gitlab-ci.yml
+
+在專案根目錄創建 **.gitlab-ci.yml**：
+
+```yaml title=".gitlab-ci.yml"
+image: docker:latest
+
+services:
+    - docker:dind
+
+variables:
+    DOCKER_TLS_CERTDIR: ''
+    DOCKER_HOST: tcp://docker:2375
+    # 使用 GitLab Container Registry
+    REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+
+stages:
+    - build
+    - test
+    - deploy
+
+# 使用 GitLab 內建的 registry 認證
+before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+build:
+    stage: build
+    script:
+        - docker build -t $REGISTRY_IMAGE:$CI_COMMIT_SHA .
+        - docker push $REGISTRY_IMAGE:$CI_COMMIT_SHA
+        # 如果是主分支，也標記為最新版本
+        - |
+            if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+              docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:latest
+              docker push $REGISTRY_IMAGE:latest
+            fi
+
+test:
+    stage: test
+    script:
+        - docker pull $REGISTRY_IMAGE:$CI_COMMIT_SHA
+        - docker run $REGISTRY_IMAGE:$CI_COMMIT_SHA npm test
+
+deploy:
+    stage: deploy
+    image: google/cloud-sdk
+    script:
+        - echo $GCP_SERVICE_KEY > gcloud-service-key.json
+        - gcloud auth activate-service-account --key-file gcloud-service-key.json
+        - gcloud config set project $GCP_PROJECT_ID
+        - gcloud config set compute/zone $GCP_COMPUTE_ZONE
+        - gcloud container clusters get-credentials $GCP_CLUSTER_NAME
+        # 使用 GitLab Container Registry 的映像
+        - kubectl set image deployment/$KUBE_DEPLOYMENT_NAME $KUBE_CONTAINER_NAME=$REGISTRY_IMAGE:$CI_COMMIT_SHA
+    only:
+        - main
+```
+
+### 3. 設定 GitLab CI/CD 變數
+
+在 GitLab 專案設定中，添加以下環境變數：
+
+- `GCP_SERVICE_KEY`: GCP 服務帳號金鑰（JSON 格式）
+- `GCP_PROJECT_ID`: GCP 專案 ID
+- `GCP_COMPUTE_ZONE`: GCP 計算區域
+- `GCP_CLUSTER_NAME`: GKE 叢集名稱
+- `KUBE_DEPLOYMENT_NAME`: Kubernetes 部署名稱
+- `KUBE_CONTAINER_NAME`: Kubernetes 容器名稱
+
+注意：不需要設定 Docker Hub 相關的變數，因為我們使用 GitLab 內建的 Container Registry。
+
+### 4. 更新 Kubernetes 配置
+
+更新 **kubernetes/deployment.yaml** 中的映像路徑：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nextjs-app
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nextjs-app
+    template:
+        metadata:
+            labels:
+                app: nextjs-app
+        spec:
+            containers:
+                - name: nextjs-app
+                  # 使用 GitLab Container Registry 的映像
+                  image: registry.gitlab.com/your-group/your-project:latest
+                  ports:
+                      - containerPort: 3000
+                  imagePullPolicy: Always
+            imagePullSecrets:
+                - name: gitlab-registry
+```
+
+### 5. 設定 Kubernetes 存取 GitLab Container Registry
+
+1. 創建 Registry 認證密鑰：
+
+```bash
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=registry.gitlab.com \
+  --docker-username=<your-gitlab-username> \
+  --docker-password=<your-gitlab-access-token> \
+  --docker-email=<your-email>
+```
+
+## 步驟四：設定 GCP 和 GKE
+
+### 1. 建立 GCP 專案
+
+1. 登入 Google Cloud Console
+2. 建立新專案
+3. 啟用必要的 API：
+    - Kubernetes Engine API
+    - Container Registry API
+
+### 2. 建立 GKE 叢集
+
+```bash
+# 設定專案
+gcloud config set project YOUR_PROJECT_ID
+
+# 建立 GKE 叢集
+gcloud container clusters create my-cluster \
+  --zone asia-east1-a \
+  --num-nodes 3 \
+  --machine-type e2-medium
+```
+
+### 3. 建立 Kubernetes 配置
+
+建立 **kubernetes/deployment.yaml**：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nextjs-app
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nextjs-app
+    template:
+        metadata:
+            labels:
+                app: nextjs-app
+        spec:
+            containers:
+                - name: nextjs-app
+                  image: registry.gitlab.com/your-group/your-project:latest
+                  ports:
+                      - containerPort: 3000
+                  imagePullPolicy: Always
+            imagePullSecrets:
+                - name: gitlab-registry
+```
+
+## 步驟五：部署流程
+
+1. **提交程式碼到 GitLab**
+
+```bash
+git add .
+git commit -m "Initial deployment setup"
+git push origin main
+```
+
+2. **監控部署過程**
+
+- 在 GitLab CI/CD Pipeline 頁面查看部署狀態
+- 使用 **kubectl** 命令檢查部署狀態：
+
+```bash
+kubectl get pods
+kubectl get services
+```
+
+3. **驗證部署**
+
+- 使用 **kubectl get service nextjs-app-service** 獲取外部 IP
+- 在瀏覽器訪問該 IP 確認應用是否正常運行
+
+## 常見問題與解決方案
+
+### 1. Docker 建置失敗
+
+- 檢查 Dockerfile 語法
+- 確認 Docker Hub 憑證正確
+- 檢查網路連接狀況
+
+### 2. GitLab CI/CD 失敗
+
+- 確認環境變數設定正確
+- 檢查 .gitlab-ci.yml 語法
+- 查看 Pipeline 日誌了解詳細錯誤
+
+### 3. GKE 部署問題
+
+- 確認 GCP 憑證正確
+- 檢查 GKE 叢集狀態
+- 確認 Kubernetes 配置文件正確
+
+## 最佳實踐建議
+
+1. **安全性考量**
+    - 使用環境變數存儲敏感資訊
+    - 定期更新 Docker 映像
+    - 實施適當的存取控制
+
+2. **效能優化**
+    - 使用多階段 Docker 建置
+    - 實施快取機制
+    - 適當設定資源限制
+
+3. **監控與維護**
+    - 設置監控告警
+    - 實施日誌收集
+    - 定期更新依賴套件
+
+4. **Container Registry 最佳實踐**
+    - 定期清理舊的容器映像
+    - 使用具體的標籤而不是 **latest**
+    - 實施映像掃描檢查安全漏洞
+    - 設定適當的存取權限控制
+
+## 參考來源
+
+- [Next.js 官方文件](https://nextjs.org/docs)
+- [GitLab CI/CD 文件](https://docs.gitlab.com/ee/ci/)
+- [Google Kubernetes Engine 文件](https://cloud.google.com/kubernetes-engine/docs)
+- [Docker 官方文件](https://docs.docker.com/)
