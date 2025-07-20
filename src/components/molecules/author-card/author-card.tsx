@@ -13,7 +13,12 @@ const AuthorCard = ({ className }: AuthorCardProps) => {
     return (
         <Card className={cn('w-74', className)}>
             <CardContent className="space-y-3">
-                <BaseAvatar className="mx-auto size-33" src={AUTHOR_INFO.avatar} fallback="author" />
+                <BaseAvatar
+                    className="mx-auto size-33"
+                    src={AUTHOR_INFO.avatar}
+                    alt={AUTHOR_INFO.name}
+                    fallback="author"
+                />
                 <div className="text-center text-2xl font-bold">{AUTHOR_INFO.name}</div>
                 <ul className="flex flex-col items-center gap-y-2 text-sm">
                     <li className="flex items-center gap-x-2">
