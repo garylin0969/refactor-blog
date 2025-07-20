@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import { getAllCategories, isCategoryExists } from '@/utils/post';
+import { getAllCategories, isCategoryExists } from '@/utils/posts';
 
 // 添加 generateStaticParams 使其變為靜態路由
 export async function generateStaticParams() {
@@ -7,7 +7,7 @@ export async function generateStaticParams() {
     return [
         { category: 'all' },
         ...categories.map((category) => ({
-            category: category?.toLowerCase(),
+            category: category.toLowerCase(),
         })),
     ];
 }

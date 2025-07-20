@@ -1,0 +1,106 @@
+---
+category: Frontend
+title: Next.js 中的 robots 和 sitemap 使用指南
+description: 本文將介紹如何在 Next.js 中使用 robots.txt 和 sitemap.xml，幫助新手設置網站的搜索引擎爬蟲規則和網站地圖。
+coverImage: /assets/blog/2025/02/nextjs-robots.png
+tags:
+    - Next.js
+    - SEO
+    - Robots.txt
+    - Sitemap
+    - Web Development
+date: 2025-02-22
+---
+
+## 什麼是 robots.txt 和 sitemap.xml？
+
+在網站開發中，**robots.txt** 和 **sitemap.xml** 是兩個重要的文件，幫助搜索引擎爬蟲更好地理解和索引網站內容。
+
+- **robots.txt**：告訴搜索引擎哪些頁面可以被爬取，哪些頁面不可以。
+- **sitemap.xml**：提供網站的結構和所有可訪問頁面的列表，幫助搜索引擎更有效地索引網站。
+
+## 在 Next.js 中使用 robots.txt
+
+在 Next.js 中，你可以通過創建一個 **robots.ts** 文件來生成 **robots.txt** 文件。以下是如何實現的示例：
+
+### 創建 robots.ts 文件
+
+在 **src/app** 目錄下創建 **robots.ts** 文件，並添加以下：
+
+```typescript title="src/app/robots.ts"
+import { MetadataRoute } from 'next';
+
+export default function robots(): MetadataRoute.Robots {
+    return {
+        rules: {
+            userAgent: '*', // 針對所有搜索引擎
+            allow: '/', // 允許訪問所有頁面
+            disallow: '/private/', // 禁止訪問私有頁面
+        },
+        sitemap: 'https://www.garylin.dev/sitemap.xml', // 指向網站地圖的 URL
+    };
+}
+```
+
+這段告訴搜索引擎可以訪問網站的所有頁面，但禁止訪問 **/private/** 路徑下的頁面。
+
+## 在 Next.js 中使用 sitemap.xml
+
+同樣地，你可以通過創建一個 **sitemap.ts** 文件來生成 **sitemap.xml** 文件。以下是如何實現的示例：
+
+### 創建 sitemap.ts 文件
+
+在 **src/app** 目錄下創建 **sitemap.ts** 文件，並添加以下：
+
+```typescript title="src/app/sitemap.ts"
+import { MetadataRoute } from 'next';
+import { getAllPosts } from '@/utils/posts'; // 假設有一個函數可以獲取所有文章
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    // 獲取所有文章
+    const posts = getAllPosts();
+
+    // 基本頁面
+    const routes = [
+        {
+            url: 'https://www.garylin.dev',
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 1.0, // 首頁最重要
+        },
+        {
+            url: 'https://www.garylin.dev/blog',
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.9, // 部落格首頁次重要
+        },
+        {
+            url: 'https://www.garylin.dev/about',
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8, // 關於頁面
+        },
+    ];
+
+    // 為每篇文章生成 sitemap 項目
+    const postRoutes = posts?.map((post) => ({
+        url: `https://www.garylin.dev/blog/posts${post?.url}`,
+        lastModified: new Date(post.date),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7, // 文章頁面
+    }));
+
+    return [...routes, ...postRoutes];
+}
+```
+
+這段生成了一個網站地圖，包含首頁、部落格首頁、關於頁面以及所有文章的 URL。
+
+## 總結
+
+在 Next.js 中使用 **robots.txt** 和 **sitemap.xml** 能夠更好地管理網站的搜索引擎優化（SEO）。
+
+## 參考來源
+
+- **[Next.js - robots.txt](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots)**
+- **[Next.js - sitemap.xml](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap)**

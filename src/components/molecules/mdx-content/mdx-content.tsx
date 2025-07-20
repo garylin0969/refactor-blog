@@ -1,69 +1,61 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import * as runtime from 'react/jsx-runtime';
-import React, { ComponentType } from 'react';
-import CodeBlock from '@/components/molecules/code-block';
-import { Badge } from '@/components/ui/badge';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeMathjax from 'rehype-mathjax';
+import type { Options } from 'rehype-pretty-code';
 
-// 提取程式碼片段的屬性
-const extractCodeBlockProps = (children: any) => {
-    const hasTitle = Array.isArray(children); // 判斷是否有標題
-    const title = hasTitle ? (children?.[0]?.props?.children ?? '') : ''; // 如果有標題，則取標題
-    // 如果有標題，則取標題的data-language屬性，否則取程式碼片段的data-language屬性
-    const language = hasTitle
-        ? (children?.[0]?.props?.['data-language'] ?? '')
-        : (children?.props?.['data-language'] ?? '');
-    // 如果有標題，則取標題的rawcontent屬性，否則取程式碼片段的rawcontent屬性
-    const copyContent = hasTitle ? (children?.[1]?.props?.rawcontent ?? '') : (children?.props?.rawcontent ?? '');
+import cn from '@/utils/cn';
+import mdxRenderConfig from '@/configs/mdx-render.config';
 
-    // 返回標題、語言和複製內容
-    return { title, language, copyContent };
-};
+import themeDark from 'shiki/dist/themes/one-dark-pro.mjs';
+import { createHighlighter } from 'shiki/bundle/web';
 
-// 客製化blog的元件
-const sharedComponents: Record<string, ComponentType<any>> = {
-    figure: ({ children, ...props }) => {
-        const { title, language, copyContent } = extractCodeBlockProps(children);
-
-        return (
-            <CodeBlock title={title} language={language} copyContent={copyContent} {...props}>
-                {children}
-            </CodeBlock>
-        );
-    },
-
-    figcaption: () => null,
-
-    code: ({ children, ...props }) => {
-        // 判斷是否為行內說明文字
-        const isInline = typeof children === 'string';
-
-        if (isInline) {
-            return (
-                <Badge className="rounded-md px-2 py-1" variant="secondary" {...props}>
-                    {children}
-                </Badge>
-            );
-        }
-
-        return <code {...props}>{children}</code>;
-    },
-};
-
-// 將Velite生成的MDX代碼解析為React元件函數
-const useMDXComponent = (code: string) => {
-    const fn = new Function(code);
-    return fn({ ...runtime }).default;
-};
-
-interface MDXProps {
-    code: string;
-    components?: Record<string, ComponentType<any>>;
+interface MDXContentProps {
+    content: string;
+    className?: string;
 }
 
-// MDXContent元件
-const MDXContent = ({ code, components }: MDXProps) => {
-    const Component = useMDXComponent(code);
-    return <Component components={{ ...sharedComponents, ...components }} />;
+const MDXContent = ({ content, className }: MDXContentProps) => {
+    return (
+        <div
+            className={cn(
+                'prose md:prose-lg',
+                'dark:prose-invert',
+                'prose-figure:!font-mono',
+                'prose-code:before:!content-none prose-code:after:!content-none',
+                className,
+            )}
+        >
+            <MDXRemote
+                source={content}
+                components={mdxRenderConfig}
+                options={{
+                    parseFrontmatter: true,
+                    mdxOptions: {
+                        remarkPlugins: [remarkGfm, remarkMath],
+                        rehypePlugins: [
+                            [rehypeMathjax, {}],
+                            [
+                                rehypePrettyCode,
+                                {
+                                    theme: themeDark,
+                                    getHighlighter: createHighlighter,
+                                    transformers: [
+                                        {
+                                            pre(node) {
+                                                node.properties.rawcontent = this.source;
+                                            },
+                                        },
+                                    ],
+                                } as Options,
+                            ],
+                        ],
+                    },
+                }}
+            />
+        </div>
+    );
 };
 
 export default MDXContent;

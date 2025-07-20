@@ -1,0 +1,98 @@
+---
+category: Frontend
+title: Git Commit Message 規範
+description: 這篇介紹了 Git Commit Message 的格式規範，包括標題、正文和尾注的結構，並提供了常見的提交類型和示例，幫助開發者撰寫清晰且有意義的提交消息。
+coverImage: /assets/blog/2024/11/git-commit-message.png
+tags:
+    - Git
+    - Version Control
+    - Development
+    - Best Practices
+date: 2024-11-22
+---
+
+這篇介紹了 Git Commit Message 的格式規範，包括標題、正文和尾注的結構，並提供了常見的提交類型和示例，幫助開發者撰寫清晰且有意義的提交消息
+
+## 基本格式
+
+```bash
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+## 格式說明
+
+commit message 由三個主要部分組成：
+
+1. **標題（header）**
+2. **正文（body）**
+3. **尾注（footer）**
+
+## 標題組成
+
+標題包含三個部分：
+
+- **類型**（type）- 必填
+- **範圍**（scope）- 可選
+- **主題**（subject）- 必填
+
+## Type 類型對照表
+
+| 類型     | 說明                                   |
+| -------- | -------------------------------------- |
+| feat     | 新功能                                 |
+| fix      | 修復 bug                               |
+| docs     | 文檔變更                               |
+| style    | 格式（不影響代碼運行的變動）           |
+| refactor | 重構（既不是新增功能，也不是修復 bug） |
+| test     | 增加測試                               |
+| chore    | 構建過程或輔助工具的變動               |
+| perf     | 性能優化、改善功能                     |
+| build    | 建構程序或外部依賴的變動               |
+| ci       | 持續集成相關的變動                     |
+| revert   | 撤銷先前的提交                         |
+| merge    | 合併分支                               |
+
+## 範例
+
+```bash
+feat(search): add fuzzy search to the search bar
+
+This commit adds a fuzzy search algorithm to the search bar,
+which allows users to search for terms that are similar to the ones they type in.
+
+Closes #1234
+```
+
+## 撰寫原則
+
+### 標題
+
+- **type**: 必須是上述其中一個類型。
+- **scope**: 可選，用於說明 commit 影響的範圍（例如：**ui**、**api**）。
+- **subject**: 簡短描述，清楚表達這次改動做了什麼，建議不超過 50 個字符。
+
+### 正文
+
+- **可選**，但建議在需要詳細說明時使用。
+- 用於解釋這次改動的詳細原因和影響，建議使用簡潔的語言。
+- 若需換行，請空一行後再寫。
+
+### 尾注
+
+- **可選**，通常用於關聯 issue 編號。
+- 可以註明關閉的 issue：**Closes #123** 或 **Fixes #123**。
+
+### 常見錯誤
+
+- **不清晰的標題**：標題應該簡潔明了，避免使用模糊的描述。
+- **缺少正文**：如果改動較大，應該在正文中詳細說明。
+- **不一致的格式**：保持一致的提交格式有助於團隊協作。
+
+### 最佳實踐
+
+- 使用命令行工具或 Git GUI 工具來撰寫提交消息，這樣可以避免格式錯誤。
+- 在撰寫提交消息之前，先思考這次改動的目的和影響，這樣可以幫助你更清晰地表達。

@@ -1,64 +1,65 @@
 import { MetadataRoute } from 'next';
-import { DOMAIN, POSTS_PER_PAGE } from '@/constants/site';
-import { getAllCategories, getAllPosts } from '@/utils/post';
-
-type SitemapEntry = MetadataRoute.Sitemap[0];
+import { DOMAIN } from '@/configs/env';
+import { getAllCategories, getAllPosts, POSTS_PER_PAGE } from '@/utils/posts';
+import { PostT } from '@/types/post';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    // 獲取所有文章
     const posts = getAllPosts();
     const categories = getAllCategories();
 
-    // 獲取最新文章日期作為動態內容的 lastModified
-    const latestPostDate = posts.length > 0 ? new Date(posts[0]?.date || '') : new Date();
-
-    // 預計算每個分類的文章數量，避免重複篩選
-    const categoryPostCounts = new Map<string, number>([
-        ['all', posts.length],
-        ...categories.map((category): [string, number] => [
-            category?.toLowerCase() || '',
-            posts.filter((post) => post?.category?.toLowerCase() === category?.toLowerCase()).length,
-        ]),
-    ]);
-
-    // 基本頁面路由
-    const staticRoutes: SitemapEntry[] = [
+    // 基本頁面
+    const routes = [
         {
             url: DOMAIN,
-            lastModified: latestPostDate, // 使用最新文章日期
-            changeFrequency: 'monthly',
-            priority: 1.0,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 1.0, // 首頁最重要
         },
         {
             url: `${DOMAIN}/about`,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.8,
+            changeFrequency: 'weekly' as const,
+            priority: 0.8, // 關於頁面
         },
     ];
 
-    // 分類頁面路由（包含分頁）
-    const categoryRoutes: SitemapEntry[] = Array.from(categoryPostCounts.entries()).flatMap(([category, postCount]) => {
-        const totalPages = Math.ceil(postCount / POSTS_PER_PAGE);
-        return Array.from({ length: totalPages }, (_, index): SitemapEntry => {
-            const page = index + 1;
-            return {
-                url: `${DOMAIN}/blog/${category}/${page}`,
-                lastModified: latestPostDate,
-                changeFrequency: 'daily',
-                priority: page === 1 ? 0.9 : 0.8, // 第一頁優先級較高
-            };
+    // 分類頁面（包含分頁）
+    const categoryRoutes = [];
+
+    // 處理 'all' 分類的分頁
+    const allTotalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+    for (let page = 1; page <= allTotalPages; page++) {
+        categoryRoutes.push({
+            url: `${DOMAIN}/blog/all/${page}`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: page === 1 ? 0.9 : 0.8, // 第一頁優先級較高
         });
+    }
+
+    // 處理其他分類的分頁
+    categories.forEach((category) => {
+        const categoryPosts = posts.filter((post: PostT) => post?.category?.toLowerCase() === category.toLowerCase());
+        const totalPages = Math.ceil(categoryPosts.length / POSTS_PER_PAGE);
+
+        for (let page = 1; page <= totalPages; page++) {
+            categoryRoutes.push({
+                url: `${DOMAIN}/blog/${category.toLowerCase()}/${page}`,
+                lastModified: new Date(),
+                changeFrequency: 'daily' as const,
+                priority: page === 1 ? 0.9 : 0.8,
+            });
+        }
     });
 
-    // 文章頁面路由
-    const postRoutes: SitemapEntry[] = posts.map(
-        (post): SitemapEntry => ({
-            url: `${DOMAIN}/blog/posts/${post?.slug}`,
-            lastModified: new Date(post.date || ''),
-            changeFrequency: 'weekly',
-            priority: 0.7,
-        })
-    );
+    // 文章頁面
+    const postRoutes = posts?.map((post: PostT) => ({
+        url: `${DOMAIN}/blog/posts${encodeURI(post?.url || '')}`,
+        lastModified: new Date(post.date || ''),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7, // 降低單篇文章的優先級，因為分類頁面更重要
+    }));
 
-    return [...staticRoutes, ...categoryRoutes, ...postRoutes];
+    return [...routes, ...categoryRoutes, ...postRoutes];
 }

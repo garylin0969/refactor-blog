@@ -1,32 +1,27 @@
+import cn from '@/utils/cn';
 import Logo from '@/components/atoms/logo';
-import ThemeToggle from '@/components/atoms/theme-toggle';
-import MobileNavigation from '@/components/molecules/mobile-navigation';
-import Navigation from '@/components/molecules/navigation';
-import SocialLinks from '@/components/molecules/social-links';
-
-// 通用樣式類別
-const HEADER_STYLES = {
-    container: 'border-border/40 bg-background/60 sticky top-0 left-0 z-50 h-14.5 border-b shadow-md backdrop-blur-md',
-    innerContainer: 'container mx-auto flex h-full items-center justify-between px-4',
-    desktopNav: 'hidden items-center gap-x-2 md:flex',
-} as const;
+import ThemeSwitch from '@/components/molecules/theme-switch';
+import NavMenu from '@/components/molecules/nav-menu';
+import SocialIconLinks from '@/components/molecules/social-icon-links';
+import BurgerMenu from '@/components/molecules/burger-menu';
 
 const Header = () => {
     return (
-        <header className={HEADER_STYLES.container}>
-            <div className={HEADER_STYLES.innerContainer}>
-                {/* 網站標題 */}
+        <header
+            className={cn(
+                'fixed top-0 z-50 flex h-16 w-full items-center bg-white/70 px-4 font-serif shadow backdrop-blur-md dark:bg-slate-900/70 md:px-6 lg:px-8',
+            )}
+        >
+            <div className={cn('mx-auto flex w-full max-w-6xl items-center justify-between')}>
                 <Logo />
-
-                {/* 桌面版導航 */}
-                <div className={HEADER_STYLES.desktopNav}>
-                    <Navigation />
-                    <SocialLinks />
-                    <ThemeToggle />
+                <div className={cn('flex items-center gap-4')}>
+                    <div className={cn('hidden items-center gap-2 md:flex')}>
+                        <NavMenu />
+                        <SocialIconLinks className="border-x border-slate-200 px-2 dark:border-slate-800" />
+                    </div>
+                    <ThemeSwitch />
+                    <BurgerMenu />
                 </div>
-
-                {/* 手機版導航 */}
-                <MobileNavigation />
             </div>
         </header>
     );

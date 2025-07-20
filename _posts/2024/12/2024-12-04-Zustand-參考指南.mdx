@@ -1,0 +1,173 @@
+---
+category: Frontend
+title: Zustand 參考指南
+description: 本文介紹 Zustand 狀態管理庫的基本概念和使用方法，包含安裝、基本用法、進階特性等內容。
+tags:
+    - Zustand
+    - State Management
+    - Frontend
+coverImage: /assets/blog/2024/12/zustand.jpg
+date: 2024-12-04
+---
+
+## 什麼是 Zustand？
+
+Zustand 是一個輕量級的狀態管理庫，專為 React 應用設計。它提供了一種簡單的 API 來管理應用的全局狀態，並且不需要使用 Context API 或 Provider。
+
+## 安裝 Zustand
+
+### 使用 npm 安裝
+
+```bash
+npm install zustand
+```
+
+## 基本用法
+
+### 創建一個 store
+
+使用 **create** 函數來創建一個 store，並定義狀態和操作：
+
+```typescript title="store.ts"
+import create from 'zustand';
+
+const useStore = create((set) => ({
+    count: 0,
+    increase: () => set((state) => ({ count: state.count + 1 })),
+    decrease: () => set((state) => ({ count: state.count - 1 })),
+}));
+```
+
+### 使用 store
+
+在你的元件中使用 **useStore** 來訪問狀態和操作：
+
+```typescript
+import React from 'react';
+import { useStore } from './store'; // 假設 store 在同一目錄下
+
+const Counter = () => {
+    const { count, increase, decrease } = useStore();
+
+    return (
+        <div>
+            <h1>Count: {count}</h1>
+            <button onClick={increase}>Increase</button>
+            <button onClick={decrease}>Decrease</button>
+        </div>
+    );
+};
+
+export default Counter;
+```
+
+## Zustand 的進階用法
+
+### 使用中間件
+
+Zustand 支持中間件，可以用來擴展功能，例如持久化狀態或進行日誌記錄。
+
+#### 持久化狀態
+
+使用 **persist** 中間件來持久化狀態：
+
+```typescript
+import create from 'zustand';
+import { persist } from 'zustand/middleware';
+
+const useStore = create(
+    persist(
+        (set) => ({
+            count: 0,
+            increase: () => set((state) => ({ count: state.count + 1 })),
+            decrease: () => set((state) => ({ count: state.count - 1 })),
+        }),
+        {
+            name: 'counter-storage', // 存儲的名稱
+        },
+    ),
+);
+```
+
+### 使用選擇器
+
+你可以使用選擇器來選擇狀態的一部分，這樣可以提高性能：
+
+```typescript
+const count = useStore((state) => state.count);
+```
+
+## 常見錯誤
+
+- **未正確引入 Zustand**：確保在使用 Zustand 之前已經正確引入庫。
+- **狀態更新不觸發重渲染**：確保使用 **set** 函數來更新狀態，直接修改狀態不會觸發重渲染。
+- **使用不當的選擇器**：確保選擇器正確，避免不必要的重渲染。
+
+## 最佳實踐
+
+- **使用中間件**：根據需要使用中間件來擴展 Zustand 的功能。
+- **保持狀態簡單**：將狀態保持在最小範圍內，避免不必要的複雜性。
+- **測試不同元件**：在不同元件中測試 Zustand 的使用，確保狀態管理的有效性。
+
+## 實用範例
+
+### 基本計數器
+
+```typescript
+import React from 'react';
+import create from 'zustand';
+
+const useStore = create((set) => ({
+    count: 0,
+    increase: () => set((state) => ({ count: state.count + 1 })),
+    decrease: () => set((state) => ({ count: state.count - 1 })),
+}));
+
+const Counter = () => {
+    const { count, increase, decrease } = useStore();
+
+    return (
+        <div>
+            <h1>Count: {count}</h1>
+            <button onClick={increase}>Increase</button>
+            <button onClick={decrease}>Decrease</button>
+        </div>
+    );
+};
+
+export default Counter;
+```
+
+### 使用持久化狀態的計數器
+
+```typescript
+import create from 'zustand';
+import { persist } from 'zustand/middleware';
+
+const useStore = create(
+    persist(
+        (set) => ({
+            count: 0,
+            increase: () => set((state) => ({ count: state.count + 1 })),
+            decrease: () => set((state) => ({ count: state.count - 1 })),
+        }),
+        {
+            name: 'counter-storage', // 存儲的名稱
+        },
+    ),
+);
+
+const Counter = () => {
+    const { count, increase, decrease } = useStore();
+
+    return (
+        <div>
+            <h1>Count: {count}</h1>
+            <button onClick={increase}>Increase</button>
+            <button onClick={decrease}>Decrease</button>
+        </div>
+    );
+};
+
+export default Counter;
+```

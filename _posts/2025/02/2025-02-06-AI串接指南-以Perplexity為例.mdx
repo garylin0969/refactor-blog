@@ -1,0 +1,81 @@
+---
+category: AI
+title: AI 串接指南 - 以 Perplexity 為例
+description: Perplexity 是一個由 AI 聊天機器人驅動的研究和對話搜尋引擎，透過自然語言處理技術來回答查詢。它於 2022 年推出，使用來自網路的資源生成答案，並在回應文本中引用相關連結。
+coverImage: /assets/blog/2025/02/perplexity.jpeg
+tags:
+    - AI
+    - Perplexity
+    - API Integration
+    - NLP
+    - ChatBot
+date: 2025-02-06
+---
+
+## 什麼是 Perplexity？
+
+Perplexity 是一個由 AI 聊天機器人驅動的研究和對話搜尋引擎，透過自然語言處理技術來回答查詢。它於 2022 年推出，使用來自網路的資源生成答案，並在回應文本中引用相關連結。
+
+### 註冊帳號與設置 API
+
+1. **註冊帳號**
+   訪問 Perplexity 平台並創建帳號。
+2. **綁定信用卡**
+   此步驟不會扣款，只是存儲 API 使用的付款資訊。
+3. **生成 API Key**
+   API Key 是長期使用的訪問令牌，可持續使用直到手動刷新或刪除。
+
+## 如何呼叫 API
+
+### API
+
+- **URL**: https://api.perplexity.ai/chat/completions
+- **Method**: POST
+- **Headers**:
+    ```json
+    {
+        "Authorization": "Bearer <token>",
+        "Content-Type": "application/json"
+    }
+    ```
+- **Request Body**:
+    ```json
+    {
+        "model": "sonar",
+        "messages": [
+            { "role": "system", "content": "Be precise and concise." },
+            { "role": "user", "content": "How many stars are there in our galaxy?" }
+        ],
+        "max_tokens": "Optional",
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "search_domain_filter": ["perplexity.ai"],
+        "return_images": false,
+        "return_related_questions": false,
+        "search_recency_filter": "month",
+        "top_k": 0,
+        "stream": false,
+        "presence_penalty": 0,
+        "frequency_penalty": 1,
+        "response_format": null
+    }
+    ```
+
+## Perplexity API 參數測試工具
+
+在開始串接之前，我開發了一個方便的工具來測試 Perplexity API 的各種參數：
+[Perplexity API 參數測試工具](https://garylin0969-perplexity-concat.vercel.app/)
+
+這個工具可以讓您：
+
+- 直觀地設定各種 API 參數
+- 即時查看 API 的回傳結果
+- 使用中文介面，輕鬆理解每個參數的作用
+- 快速測試不同參數組合的效果
+
+## 參考來源
+
+- **[取得 API Key](https://docs.perplexity.ai/guides/getting-started)**
+- **[模型資訊](https://docs.perplexity.ai/guides/model-cards)**
+- **[價格說明](https://docs.perplexity.ai/guides/pricing)**
+- **[API 參考文件](https://docs.perplexity.ai/api-reference/chat-completions)**

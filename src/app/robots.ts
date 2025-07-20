@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { DOMAIN } from '@/constants/site';
+import { DOMAIN } from '@/configs/env';
 
 export default function robots(): MetadataRoute.Robots {
     return {

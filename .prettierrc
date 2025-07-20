@@ -1,10 +1,9 @@
 {
-    "singleQuote": true,
-    "trailingComma": "es5",
+    "plugins": ["prettier-plugin-tailwindcss"],
+    "arrowParens": "always",
     "semi": true,
-    "endOfLine": "auto",
+    "trailingComma": "all",
+    "singleQuote": true,
     "tabWidth": 4,
-    "printWidth": 120,
-    "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
-    "importOrder": ["^react$", "^react-dom$", "^@/(.*)$", "^[./]"]
+    "printWidth": 120
 }

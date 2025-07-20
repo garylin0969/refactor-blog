@@ -1,28 +1,20 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/utils/shadcn';
+import cn from '@/utils/cn';
 
 interface SkillCardProps {
-    className?: string;
     title: string;
     skills: string[];
 }
 
-const SkillCard = ({ title, skills, className }: SkillCardProps) => {
+const SkillCard = ({ title, skills }: SkillCardProps) => {
     return (
-        <Card className={cn('gap-0 bg-transparent p-5', className)}>
-            <CardHeader className="gap-0 border-b !p-0 !pb-2">
-                <CardTitle className="text-lg">{title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-                <ul className="list-inside list-disc space-y-1 p-3">
-                    {skills.map((skill) => (
-                        <li key={skill} className="text-base">
-                            {skill}
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
+        <div className="mx-2 flex-1 transform rounded-lg border border-purple-100 p-5 shadow-md transition-transform dark:border-white/30">
+            <h2 className="border-b-2 border-gray-200 pb-2 text-xl font-bold">{title}</h2>
+            <ul className={cn('list-inside list-disc space-y-1 rounded-lg', 'p-4')}>
+                {skills.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                ))}
+            </ul>
+        </div>
     );
 };
 

@@ -1,15 +1,35 @@
 import type { NextConfig } from 'next';
+import { withContentlayer } from 'next-contentlayer2';
 
 const nextConfig: NextConfig = {
-    /* config options here */
+    reactStrictMode: true,
     images: {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'github-readme-stats.vercel.app',
+                hostname: 'giscus.app',
+                port: '',
+                pathname: '/**',
             },
         ],
     },
+    transpilePackages: ['next-mdx-remote'],
+    pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+
+    // 添加 headers 配置
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'X-Robots-Tag',
+                        value: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+                    },
+                ],
+            },
+        ];
+    },
 };
 
-export default nextConfig;
+export default withContentlayer(nextConfig);

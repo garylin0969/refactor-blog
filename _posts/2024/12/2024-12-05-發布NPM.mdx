@@ -1,0 +1,106 @@
+---
+category: Frontend
+title: 發布 NPM 套件指南
+description: 本文介紹如何建立和發布 NPM 套件，包含套件開發、測試、發布流程等完整說明。
+tags:
+    - NPM
+    - Node.js
+    - JavaScript
+    - Package Management
+    - Development
+coverImage: /assets/blog/2024/12/npm.jpg
+date: 2024-12-05
+---
+
+## 初始化項目
+
+要開始創建一個 NPM 套件，首先需要初始化一個新的項目。這可以通過以下命令完成：
+
+```bash
+npm init
+```
+
+如果只是想要快速建立一個 **package.json** 檔案，可以使用：
+
+```bash
+npm init -y
+```
+
+### **package.json** 的基本資訊範例
+
+- **package name (名稱)**：**taiwan-number-format**
+- **version (版本)**：可以從 **1.0.0** 開始
+- **description (描述)**：將數字轉換為繁體中文的套件
+- **entry point (入口點)**：通常是主要程式碼檔案的路徑，例如 **index.js**
+- **test command (測試命令)**：用於執行測試的命令，如果有的話
+- **git repository (Git 儲存庫)**：如果你將程式碼存儲在 Git 中，填寫你的 Git 儲存庫網址
+- **keywords (關鍵字)**：描述套件的關鍵字，例如 **taiwan, number, format, chinese**
+- **author (作者)**：填寫你的名字或組織
+- **license (授權)**：根據偏好，選擇一個適合套件的授權類型，如 MIT、Apache-2.0、ISC 等
+
+以下是一個 **package.json** 的範例：
+
+```json title="package.json"
+{
+    "name": "chinese-number-format",
+    "version": "1.0.2",
+    "description": "中文數字轉換Chinese numeral conversion",
+    "main": "dist/index.js", // 入口
+    "types": "dist/index.d.ts", // 使用 TypeScript 的定義文件
+    "scripts": {
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/garylin0969/chinese-number-format.git"
+    },
+    "keywords": ["台灣", "中華民國"],
+    "author": {
+        "name": "GaryLin",
+        "email": "xxxxxx@gmail.com"
+    },
+    "license": "ISC",
+    "devDependencies": {
+        "@types/jest": "^29.5.11",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.3.3"
+    }
+}
+```
+
+## 使用 TypeScript
+
+如果你的套件使用 TypeScript，首先需要安裝 TypeScript：
+
+```bash
+npm install typescript --save-dev
+```
+
+然後初始化 TypeScript 配置：
+
+```bash
+npx tsc --init
+```
+
+這將在根目錄創建一個 tsconfig.json 文件。以下是 **tsconfig.json** 的基本資訊範例：
+
+```json title="tsconfig.json"
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "outDir": "./dist", // 指定編譯後的 JavaScript 文件輸出目錄為 dist
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "declaration": true, // 生成 .d.ts 文件
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*.ts" // 設定 TypeScript 源碼的位置
+    ],
+    "exclude": ["node_modules"] // 不需要編譯的文件
+}
+```

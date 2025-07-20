@@ -1,0 +1,280 @@
+---
+category: LeetCode
+title: 算法複雜度入門：O(n) 是什麼？讓初學者也能輕鬆理解
+description: 用簡單易懂的方式解釋算法複雜度概念，包括 O(1)、O(n)、O(log n)、O(n²) 等，並通過生活化的例子和視覺化解釋，幫助完全沒接觸過算法的人理解如何評估程式碼效率。
+tags:
+    - 算法
+    - 時間複雜度
+    - 空間複雜度
+    - 程式效能
+    - LeetCode
+coverImage: /assets/blog/2025/03/algorithm-complexity.png
+date: 2025-03-06
+---
+
+## 什麼是算法複雜度？
+
+想像你正在做一道菜。「算法複雜度」就像是評估這道菜需要多少時間和食材一樣。在程式設計中，我們關心兩種資源：
+
+- **時間複雜度**：程式執行需要多少時間
+- **空間複雜度**：程式執行需要多少記憶體空間
+
+我們使用「大 O 表示法」(Big O Notation) 來描述這些複雜度，例如 O(1)、O(n)、O(n²) 等。
+
+## 為什麼要關心算法複雜度？
+
+假設你有兩種方法可以完成同一個任務：
+
+- 方法 A：需要 5 分鐘
+- 方法 B：需要 5 小時
+
+顯然，方法 A 更有效率！在程式設計中也是如此，尤其是當處理大量資料時，選擇一個好的算法可能意味著程式在幾毫秒內完成，而不是等待數小時。
+
+## 常見的時間複雜度
+
+### O(1) - 常數時間
+
+**簡單解釋**：無論輸入多大，執行時間都一樣。
+
+**生活例子**：從一疊撲克牌中直接抽出最上面的一張。不管這疊牌有 10 張還是 100 張，你都只需要一個動作。
+
+**程式例子**：
+
+```javascript
+function getFirstElement(array) {
+    return array[0]; // 只需一步，不管陣列多大
+}
+```
+
+**視覺化**：
+
+```plaintext
+輸入大小 (n) →  1   10   100   1000
+執行時間     →  1    1     1      1
+```
+
+### O(n) - 線性時間
+
+**簡單解釋**：執行時間與輸入大小成正比。
+
+**生活例子**：檢查一疊撲克牌中是否有特定的牌。如果有 10 張牌，最壞情況下你需要看 10 張；如果有 100 張牌，最壞情況下你需要看 100 張。
+
+**程式例子**：
+
+```javascript
+function findElement(array, element) {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === element) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+**視覺化**：
+
+```plaintext
+輸入大小 (n) →  1   10   100   1000
+執行時間     →  1   10   100   1000
+```
+
+### O(log n) - 對數時間
+
+**簡單解釋**：執行時間與輸入大小的對數成正比。
+
+**生活例子**：在一本按字母順序排列的字典中查找一個單詞。你不需要從頭到尾檢查每一頁，而是可以翻到中間，看看要找的單詞在前半部分還是後半部分，然後只在那一半中繼續查找。
+
+**程式例子**：二分搜尋法
+
+```javascript
+function binarySearch(sortedArray, element) {
+    let left = 0;
+    let right = sortedArray.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+
+        if (sortedArray[mid] === element) {
+            return mid;
+        }
+
+        if (sortedArray[mid] < element) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    return -1; // 沒找到
+}
+```
+
+**視覺化**：
+
+```plaintext
+輸入大小 (n) →  1   10   100   1000
+執行時間     →  0    3     7     10
+```
+
+### O(n²) - 平方時間
+
+**簡單解釋**：執行時間與輸入大小的平方成正比。
+
+**生活例子**：檢查一個班級中每兩個學生是否認識對方。如果有 10 個學生，你需要檢查約 10² = 100 種組合；如果有 100 個學生，你需要檢查約 100² = 10,000 種組合。
+
+**程式例子**：
+
+```javascript
+function hasDuplicates(array) {
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < array.length; j++) {
+            if (i !== j && array[i] === array[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+```
+
+**視覺化**：
+
+```plaintext
+輸入大小 (n) →  1   10   100   1000
+執行時間     →  1  100  10000  1000000
+```
+
+## 如何計算時間複雜度？
+
+計算時間複雜度時，我們關注的是當輸入變得非常大時，程式的行為。以下是一些基本規則：
+
+1. **忽略常數**：O(2n) 簡化為 O(n)，O(500) 簡化為 O(1)
+2. **只保留最高次項**：O(n² + n) 簡化為 O(n²)
+3. **忽略係數**：O(3n²) 簡化為 O(n²)
+
+### 實例分析
+
+讓我們分析一個簡單的函數：
+
+```javascript
+function example(n) {
+    let count = 0; // O(1)
+
+    for (let i = 0; i < n; i++) {
+        count += 1; // 這個循環執行 n 次，所以是 O(n)
+    }
+
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            count += 1; // 這個嵌套循環執行 n*n 次，所以是 O(n²)
+        }
+    }
+
+    return count; // O(1)
+}
+```
+
+總複雜度：O(1) + O(n) + O(n²) + O(1) = O(n²)
+
+## 常見算法的複雜度比較
+
+| 算法       | 時間複雜度 | 適用場景             |
+| ---------- | ---------- | -------------------- |
+| 簡單查找   | O(n)       | 小型資料集，無序資料 |
+| 二分查找   | O(log n)   | 已排序資料           |
+| 冒泡排序   | O(n²)      | 教學用途，小型資料集 |
+| 快速排序   | O(n log n) | 一般用途排序         |
+| 雜湊表查找 | O(1)       | 需要快速查找的場景   |
+
+## 空間複雜度
+
+除了時間複雜度，我們也關心空間複雜度 - 程式執行時需要多少額外記憶體。
+
+**例子**：
+
+```javascript
+function createArray(n) {
+    const result = []; // 創建一個新陣列
+
+    for (let i = 0; i < n; i++) {
+        result.push(i); // 添加 n 個元素
+    }
+
+    return result; // 返回大小為 n 的陣列
+}
+```
+
+這個函數的空間複雜度是 O(n)，因為它創建了一個大小與輸入成正比的新陣列。
+
+## 如何優化你的程式碼
+
+了解算法複雜度後，你可以通過以下方法優化程式碼：
+
+1. **選擇合適的資料結構**：例如，使用雜湊表 (Hash Map) 可以將查找操作從 O(n) 優化到 O(1)
+2. **避免嵌套循環**：嘗試將 O(n²) 的算法優化為 O(n) 或 O(n log n)
+3. **使用分治法**：將大問題分解為小問題，如二分查找
+4. **使用動態規劃**：避免重複計算相同的子問題
+5. **空間換時間**：有時候使用更多記憶體可以大幅提高執行速度
+
+## 實際應用例子
+
+### 例子 1：尋找最大值
+
+```javascript
+// O(n) 解法
+function findMax(array) {
+    let max = array[0];
+    for (let i = 1; i < array.length; i++) {
+        if (array[i] > max) {
+            max = array[i];
+        }
+    }
+    return max;
+}
+```
+
+### 例子 2：檢查重複元素
+
+```javascript
+// O(n²) 解法 - 較慢
+function hasDuplicatesSlow(array) {
+    for (let i = 0; i < array.length; i++) {
+        for (let j = i + 1; j < array.length; j++) {
+            if (array[i] === array[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// O(n) 解法 - 較快
+function hasDuplicatesFast(array) {
+    const seen = new Set();
+    for (let item of array) {
+        if (seen.has(item)) {
+            return true;
+        }
+        seen.add(item);
+    }
+    return false;
+}
+```
+
+## 總結
+
+理解算法複雜度是成為優秀程式設計師的關鍵一步。通過學習大 O 表示法，你可以：
+
+- 評估程式碼的效率
+- 預測程式在大型輸入下的表現
+- 選擇最適合特定問題的算法
+- 優化現有程式碼以提高性能
+
+記住，最快的算法不一定總是最好的選擇。有時候，程式碼的可讀性、維護性和開發時間也同樣重要。在實際工作中，你需要在效率和這些因素之間找到平衡。
+
+## 進一步學習資源
+
+- **[Big-O Cheat Sheet](https://www.bigocheatsheet.com/)** - 視覺化不同算法的複雜度
+- **[LeetCode](https://leetcode.com/)** - 練習不同複雜度的算法問題
+- **[Visualgo](https://visualgo.net/)** - 算法視覺化工具

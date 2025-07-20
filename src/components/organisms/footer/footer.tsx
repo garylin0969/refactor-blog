@@ -1,24 +1,19 @@
-import { FOOTER_CONFIG } from '@/constants/footer';
+import cn from '@/utils/cn';
+import { BaseLink } from '@/components/atoms/link';
+import footerConfig from '@/configs/components/footer.config';
 
 const currentYear = new Date().getFullYear();
 
 const Footer = () => {
     return (
-        <footer className="border-t py-6 text-center text-sm tracking-wide">
+        <footer className={cn('py-6', 'text-center text-sm tracking-wide')}>
             <p>
                 &copy;{' '}
-                {FOOTER_CONFIG.startYear === currentYear ? currentYear : `${FOOTER_CONFIG.startYear}-${currentYear}`}
-                <span className="mx-1">
-                    <a
-                        className="hover:text-primary"
-                        href={FOOTER_CONFIG.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        {FOOTER_CONFIG.linkTitle}
-                    </a>
+                {footerConfig.startYear === currentYear ? currentYear : `${footerConfig.startYear}-${currentYear}`}
+                <span className={cn('mx-1')}>
+                    <BaseLink href={footerConfig.link}>{footerConfig.linkTitle}</BaseLink>
                 </span>
-                {FOOTER_CONFIG.copyright}
+                {footerConfig.copyright}
             </p>
         </footer>
     );

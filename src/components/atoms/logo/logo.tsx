@@ -1,39 +1,22 @@
 import Link from 'next/link';
-import NextImage from '@/components/atoms/next-image';
-import { LOGO_IMAGE_PATH, WEBSITE_TITLE } from '@/constants/site';
+import Image from 'next/image';
+import cn from '@/utils/cn';
+import headerConfig from '@/configs/components/header.config';
 
-interface LogoProps {
-    href?: string;
-    className?: string;
-    imageClassName?: string;
-    imageWidth?: number;
-    imageHeight?: number;
-    imageLoading?: 'eager' | 'lazy';
-    imageAlt?: string;
-    titleClassName?: string;
-}
-
-const Logo = ({
-    href = '/',
-    className = 'flex items-center gap-x-2',
-    imageClassName,
-    imageWidth = 32,
-    imageHeight = 32,
-    imageLoading = 'eager',
-    imageAlt = 'website logo',
-    titleClassName = 'font-bold',
-}: LogoProps) => {
+const Logo = () => {
     return (
-        <Link href={href} className={className}>
-            <NextImage
-                src={LOGO_IMAGE_PATH}
-                className={imageClassName}
-                width={imageWidth}
-                height={imageHeight}
-                loading={imageLoading}
-                alt={imageAlt}
-            />
-            <span className={titleClassName}>{WEBSITE_TITLE}</span>
+        <Link href="/">
+            <div className={cn('flex items-center gap-2')}>
+                <Image
+                    // className="h-9 w-9 rounded-md object-contain"
+                    src={headerConfig.logoImageUrl}
+                    width={36}
+                    height={36}
+                    alt="logo"
+                    priority
+                />
+                <h1 className="text-2xl font-bold text-slate-700 dark:text-slate-200">{headerConfig.title}</h1>
+            </div>
         </Link>
     );
 };
