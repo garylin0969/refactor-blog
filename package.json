@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "velite build && next dev --turbopack",
+        "dev": "next dev --turbopack",
         "build": "velite build && next build",
         "velite": "velite build",
         "start": "next start",
